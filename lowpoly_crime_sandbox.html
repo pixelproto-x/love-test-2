@@ -68,7 +68,7 @@ function makeCity(){
  for(let i=0;i<10;i++){const car=new THREE.Group();const col=carColors[i%carColors.length];box(2.15,.7,4,col,0,.65,0,car);box(1.45,.65,1.8,0x8cc4d8,0,1.25,-.2,car);for(const wx of [-1.08,1.08])for(const wz of [-1.25,1.25]){const wh=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.18,10),mat(0x20242a));wh.rotation.z=Math.PI/2;wh.position.set(wx,.35,wz);car.add(wh)}box(1.5,.15,.12,0xffefb0,0,.7,2.02,car);box(1.5,.15,.12,0xe55c5c,0,.7,-2.02,car);car.position.set(-48+i*10,0,i%2?12:-12);car.rotation.y=i%2?0:Math.PI;car.userData={speed:.6+Math.random()*1.2,baseX:car.position.x,baseZ:car.position.z};scene.add(car);cars.push(car)}
  clock=new THREE.Clock();
 }
-function moveMarker(){const spots=[[24,24],[-24,48],[48,-24],[-48,-24]];const s=spots[mission%spots.length];marker.position.set(s[0],0,s[1]);}
+function moveMarker(){const spots=[[0,-24],[24,-48],[48,-24],[-48,-24]];const s=spots[mission%spots.length];marker.position.set(s[0],0,s[1]);}
 function nearestCar(){let best=null,dist=5;for(const c of cars){const d=c.position.distanceTo(player.position);if(d<dist){best=c;dist=d}}return best}
 function interact(){if(!started)return;if(inCar){inCar=false;player.visible=true;player.position.x=vehicle.position.x+2.5;player.position.z=vehicle.position.z;vehicle=null;updateHUD();say('你已下車');return}
  const c=nearestCar();if(c){vehicle=c;inCar=true;player.visible=false;updateHUD();say('已上車！用搖桿或 WASD 駕駛');return}
