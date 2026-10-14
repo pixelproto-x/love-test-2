@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'open-city-rise.html'
+      - '.github/workflows/open-city-rise-smoke-test.yml'
 permissions:
   contents: read
 concurrency:
@@ -23,9 +24,18 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+      - name: Serve the exact checked-out game revision
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/open-city-rise-http.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/open-city-rise.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/open-city-rise-http.log
+          exit 1
       - name: Test desktop, portrait phone, and landscape phone
         env:
-          GAME_URL: https://pixelproto-x.github.io/love-test-2/open-city-rise.html
+          GAME_URL: http://127.0.0.1:4173/open-city-rise.html
         run: |
           mkdir -p artifacts
           node --input-type=module <<'NODE'
@@ -67,8 +77,18 @@ jobs:
               assert.equal(await page.locator('#touchUI').evaluate(el => getComputedStyle(el).display !== 'none'), true, label + ': mobile controls hidden');
               const box = await page.locator('#touchActions').boundingBox();
               assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1, label + ': touch actions clipped');
+              const joy = await page.locator('#moveStick').boundingBox();
+              const before = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
+              await page.mouse.move(joy.x + joy.width / 2, joy.y + joy.height / 2);
+              await page.mouse.down();
+              await page.mouse.move(joy.x + joy.width / 2, joy.y + joy.height / 2 - 27, { steps: 4 });
+              await page.waitForTimeout(850);
+              await page.mouse.up();
+              const after = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
+              assert.ok(Math.hypot(after.x - before.x, after.z - before.z) > 0.25, label + ': touch joystick did not move the player');
             } else {
               assert.equal(await page.locator('#touchUI').evaluate(el => getComputedStyle(el).display === 'none'), true, 'desktop: touch controls should be hidden');
+              assert.equal(await page.evaluate(() => document.pointerLockElement !== null), false, 'desktop: pointer locked automatically on start');
               const before = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
               await page.keyboard.down('w'); await page.waitForTimeout(850); await page.keyboard.up('w');
               const after = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
