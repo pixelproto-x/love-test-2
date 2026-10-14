@@ -21,7 +21,6 @@
   "build": {
     "appId": "com.opencityrise.desktop",
     "productName": "Open City Rise",
-    "artifactName": "${productName}-${version}-${arch}-${target}.${ext}",
     "directories": {
       "output": "release"
     },
