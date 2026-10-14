@@ -20,7 +20,7 @@ assert.ok(html.includes("'./vendor/three.min.js'"), 'Game does not attempt to lo
 assert.ok(html.includes('function gameKeyCode(e)'), 'The WASD keyboard fix is missing');
 assert.ok(html.includes('配送任務完成'), 'City delivery missions are missing');
 assert.ok(html.includes('開始警車追逐挑戰'), 'Police pursuit challenge is missing');
-assert.ok(!/function\\s+attack\\s*\\(/.test(html), 'Combat attack function must not be present');
+assert.ok(!/function\s+attack\s*\(/.test(html), 'Combat attack function must not be present');
 assert.ok(!html.includes('makeGunModel('), 'Hand-held weapon models must not be present');
 assert.ok(!html.includes('搶劫成功'), 'Crime robbery event must not be present');
 assert.ok(!html.includes('case\'Digit1\':setWeapon'), 'Weapon key switching must not be present');
