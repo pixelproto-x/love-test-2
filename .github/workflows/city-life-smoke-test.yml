@@ -104,7 +104,7 @@ jobs:
               await page.waitForFunction(() => {
                 const raw = document.getElementById('objectiveDistance')?.innerText || '';
                 const match = raw.match(/\d+/);
-                return !!match && Number(match[0]) <= 5;
+                return !!match && Number(match[0]) <= 4;
               }, null, { timeout: 30000, polling: 200 });
               await page.keyboard.up('ArrowUp');
               await page.keyboard.up('Shift');
