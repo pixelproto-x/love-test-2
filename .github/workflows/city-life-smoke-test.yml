@@ -34,7 +34,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.GAME_URL;
-          const expectedVersion = 'citylife-2026-10-14-d';
+          const expectedVersion = 'citylife-2026-10-14-e';
           const browserErrors = [];
           const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
 
@@ -131,18 +131,25 @@ jobs:
               console.log('desktop: keyboard navigation, contextual action, and first mission passed');
             }
 
-            if (mobile && !landscape) {
+            if (mobile) {
               const beforeJoy = Number((await page.locator('#objectiveDistance').innerText()).match(/\d+/)?.[0]);
-              const rect = await page.locator('#joystick').boundingBox();
-              await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+              const startX = 42;
+              const startY = Math.floor(viewport.height * (landscape ? 0.43 : 0.55));
+              const defaultJoyBox = await page.locator('#joystick').boundingBox();
+              const startsAwayFromVisiblePad = !(startX >= defaultJoyBox.x && startX <= defaultJoyBox.x + defaultJoyBox.width && startY >= defaultJoyBox.y && startY <= defaultJoyBox.y + defaultJoyBox.height);
+              assert.equal(startsAwayFromVisiblePad, true, label + ': test should start away from the small visible joystick');
+              await page.mouse.move(startX, startY);
               await page.mouse.down();
-              await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2 - 30, { steps: 5 });
+              await page.mouse.move(startX, startY - 28, { steps: 5 });
               await page.waitForTimeout(1400);
               const duringJoy = Number((await page.locator('#objectiveDistance').innerText()).match(/\d+/)?.[0]);
               const stickTransform = await page.locator('#joyStick').evaluate(el => el.style.transform);
+              const floatingPad = await page.locator('#joystick').boundingBox();
               await page.mouse.up();
-              assert.ok(stickTransform !== 'translate(0px, 0px)' && stickTransform !== 'translate(0, 0)', 'joystick knob did not move');
-              assert.ok(Number.isFinite(beforeJoy) && Number.isFinite(duringJoy) && duringJoy < beforeJoy, 'touch joystick did not move the player: ' + beforeJoy + ' -> ' + duringJoy);
+              assert.ok(stickTransform !== 'translate(0px, 0px)' && stickTransform !== 'translate(0, 0)', label + ': floating stick did not respond');
+              assert.ok(floatingPad && Math.abs(floatingPad.x - defaultJoyBox.x) + Math.abs(floatingPad.y - defaultJoyBox.y) > 25, label + ': joystick did not appear under the touch point');
+              assert.ok(Number.isFinite(beforeJoy) && Number.isFinite(duringJoy) && duringJoy < beforeJoy, label + ': dragging anywhere in the left half did not move the player: ' + beforeJoy + ' -> ' + duringJoy);
+              console.log(label + ': left-half free-touch movement passed (' + beforeJoy + ' -> ' + duringJoy + ')');
             }
 
             await page.screenshot({ path: 'artifacts/' + label + '-game.png' });
