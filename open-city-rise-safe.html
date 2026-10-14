@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>OPEN CITY: RISE — 城市探索版</title>
+<style>
+:root{--panel:rgba(9,15,25,.88);--line:rgba(255,255,255,.16);--cyan:#66e5ff;--gold:#ffd66b;--red:#ff5d70;--green:#82ffb1}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91c9e5;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;touch-action:none;user-select:none}canvas{display:block}
+#game{position:fixed;inset:0}#hud{position:fixed;inset:0;pointer-events:none;text-shadow:0 2px 5px #0009}
+.topbar{position:absolute;left:12px;top:12px;display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;max-width:calc(100% - 24px)}.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;backdrop-filter:blur(8px)}.chip b{color:var(--cyan)}#wanted{letter-spacing:2px;color:#555;font-size:18px}#wanted .on{color:#ffcb5e}#status{position:absolute;top:74px;left:12px;max-width:min(380px,calc(100% - 24px));font-size:13px;color:#fff;background:#101927b8;padding:8px 11px;border-radius:9px;border-left:3px solid var(--cyan);min-height:34px}#help{position:absolute;right:12px;top:12px;max-width:280px;font-size:12px;line-height:1.55;background:var(--panel);border:1px solid var(--line);padding:10px 12px;border-radius:10px;color:#e5f1fb}button{font:inherit;cursor:pointer;color:white;border:1px solid #ffffff30;background:#1b2b3ee8;border-radius:9px;padding:9px 11px;box-shadow:0 4px 12px #0003}button:active{transform:scale(.97)}button:hover{background:#29445c}#trainerToggle{position:absolute;top:12px;left:50%;transform:translateX(-50%);pointer-events:auto;border-color:#7ce7ff80;background:#092d42ed;color:#a8f2ff;font-weight:800;white-space:nowrap}#trainer{position:absolute;pointer-events:auto;top:58px;left:50%;transform:translateX(-50%);width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 82px);overflow:auto;display:none;background:rgba(7,13,23,.96);border:1px solid #6de7ff70;border-radius:14px;box-shadow:0 18px 50px #0008;padding:13px;backdrop-filter:blur(12px)}#trainer.open{display:block}.panelHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.panelHead strong{color:var(--cyan);letter-spacing:.5px}.sectionTitle{font-size:11px;letter-spacing:1.4px;color:#9bb4c7;margin:12px 0 7px}.btnGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.btnGrid button{font-size:12px;text-align:left;min-height:38px}.btnGrid .good{border-color:#80ffc477}.btnGrid .danger{border-color:#ff647877}.btnGrid .gold{border-color:#ffd66b88}.settingrow{display:flex;gap:6px;margin-top:7px}.settingrow input{width:100%;min-width:0;color:white;background:#0c1725;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:13px}#crosshair{position:absolute;left:50%;top:50%;width:10px;height:10px;transform:translate(-50%,-50%);opacity:.8}#crosshair:before,#crosshair:after{content:"";position:absolute;background:white;box-shadow:0 0 4px #000}#crosshair:before{width:10px;height:2px;top:4px;left:0}#crosshair:after{width:2px;height:10px;left:4px;top:0}#toast{position:absolute;left:50%;top:22%;transform:translateX(-50%);background:#08111de8;border:1px solid #ffffff30;border-radius:12px;padding:10px 16px;opacity:0;transition:opacity .2s;max-width:85%;text-align:center;font-size:14px}#bottomInfo{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:9px;background:#09111dc7;font-size:12px;white-space:nowrap;color:#d8e4ef}#startCover{position:fixed;inset:0;z-index:20;background:linear-gradient(180deg,#101f3199,#060c18e8);display:grid;place-items:center;padding:20px}#startCard{width:min(560px,100%);padding:26px;border:1px solid #9beeff50;border-radius:20px;background:#071321eF;box-shadow:0 25px 80px #0008}#startCard h1{margin:0 0 8px;font-size:clamp(28px,6vw,46px);letter-spacing:1px;line-height:1.05}#startCard h1 span{color:var(--cyan)}#startCard p{color:#c8d6e2;line-height:1.6;font-size:14px}#startCard .startrow{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:18px}#startBtn{background:#53d7ef;color:#06202d;font-weight:900;border:0;padding:12px 20px}#touchUI{display:none;position:fixed;inset:0;pointer-events:none} .stick{pointer-events:auto;position:absolute;width:118px;height:118px;border:1px solid #ffffff5c;border-radius:50%;background:#07101d59;bottom:20px;touch-action:none;box-shadow:inset 0 0 18px #fff1}.stick .nub{position:absolute;left:50%;top:50%;width:48px;height:48px;transform:translate(-50%,-50%);border-radius:50%;background:#bfefff75;border:1px solid #ffffffa0;box-shadow:0 2px 10px #0005}.stick small{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:10px;color:#ffffffad}#moveStick{left:18px}#lookStick{right:158px}#touchActions{pointer-events:auto;position:absolute;right:12px;bottom:18px;display:grid;grid-template-columns:repeat(2,58px);gap:6px}#touchActions button{padding:0;width:58px;height:45px;border-radius:12px;background:#102338cb;border-color:#ffffff55;font-size:11px;font-weight:700;touch-action:manipulation}#touchActions button.attack{background:#8c2639d9;border-color:#ffb3be80}#touchActions button.interact{background:#175c50df}#touchActions button.wide{grid-column:span 2;width:100%;height:35px}#mobileTip{display:none;position:absolute;bottom:148px;left:12px;padding:6px 8px;background:#061321a8;border-radius:7px;font-size:10px;color:#d5e5f2}.bar{height:6px;border-radius:20px;background:#ffffff28;overflow:hidden;margin-top:5px}.bar>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#48e6af,#b8ff9c)}
+@media(max-width:700px){#help{display:none}.topbar{left:8px;top:8px;gap:5px}.chip{padding:6px 8px;font-size:11px;border-radius:8px}#status{top:58px;left:8px;font-size:11px;padding:6px 8px;max-width:65%;min-height:28px}#trainerToggle{top:8px;right:8px;left:auto;transform:none;font-size:11px;padding:8px 9px}#trainer{top:48px}#crosshair{display:none}#bottomInfo{bottom:142px;font-size:10px}#touchUI{display:block}#mobileTip{display:block}#lookStick{right:144px;width:105px;height:105px;bottom:19px}#moveStick{width:105px;height:105px;bottom:19px;left:12px}#touchActions{right:8px;bottom:16px;grid-template-columns:repeat(2,54px);gap:5px}#touchActions button{width:54px;height:42px;font-size:10px}#touchActions button.wide{width:100%}#trainer{top:48px;max-height:calc(100dvh - 58px)}#startCard{padding:21px}}
+@media(max-height:480px) and (orientation:landscape){.stick{width:88px;height:88px;bottom:8px}.stick .nub{width:38px;height:38px}#moveStick{left:8px}#lookStick{right:140px}#touchActions{bottom:7px;right:7px;grid-template-columns:repeat(2,48px)}#touchActions button{width:48px;height:34px}#touchActions button.wide{width:100%;height:28px}#mobileTip{bottom:103px}#bottomInfo{bottom:105px}.topbar .chip{font-size:10px;padding:5px 7px}}
+
+/* Unified mobile/desktop final layout */
+html,body{min-height:100%;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+button{ -webkit-user-select:none; user-select:none } input,textarea{ -webkit-user-select:text; user-select:text }
+#miniMap{position:fixed;left:14px;bottom:14px;width:148px;height:148px;border:1px solid #c7e6ff70;border-radius:12px;background:#071321dd;box-shadow:0 8px 24px #0005;pointer-events:none;z-index:3}
+#hud{pointer-events:none;z-index:6}#hud button,#trainer,#trainer *{pointer-events:auto}#touchUI{z-index:5}
+#startCard{max-height:calc(100dvh - 32px);overflow:auto}
+#trainer{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#touchActions button{min-height:42px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#runTouch{border-color:#f1cb70a0!important;color:#ffe6a2}
+body.touch-device #touchUI{display:block}
+body.touch-device #help{display:none}
+body.touch-device #miniMap{width:112px;height:112px;left:10px;bottom:137px}
+body.touch-device #bottomInfo{bottom:136px;max-width:62vw;overflow:hidden;text-overflow:ellipsis}
+body.touch-device #trainerToggle{left:auto;right:8px;top:8px;transform:none}
+body.touch-device #trainer{left:auto;right:8px;transform:none;width:min(380px,calc(100vw - 16px));top:48px;max-height:calc(100dvh - 58px)}
+body.touch-device #status{max-width:min(60vw,360px);top:70px}
+body.touch-device .topbar{max-width:calc(100% - 115px);gap:4px}
+body.touch-device .chip{padding:5px 7px;font-size:11px}
+body.touch-device #moveStick{left:12px;bottom:16px;width:105px;height:105px}
+body.touch-device #lookStick{right:132px;bottom:16px;width:105px;height:105px}
+body.touch-device #touchActions{right:8px;bottom:12px;grid-template-columns:repeat(2,52px);gap:4px}
+body.touch-device #touchActions button{width:52px;height:39px;min-height:39px;font-size:10px}
+body.touch-device #touchActions button.wide{grid-column:span 2;width:100%;height:31px;min-height:31px}
+@media(max-width:700px){
+ #miniMap{width:104px;height:104px}
+ body.touch-device #status{top:75px;max-width:58vw;font-size:10px;padding:5px 7px}
+ body.touch-device .topbar{max-width:calc(100% - 108px)}
+ body.touch-device .chip{font-size:10px;padding:4px 6px}
+ body.touch-device #moveStick{left:9px;bottom:12px;width:94px;height:94px}
+ body.touch-device #lookStick{right:120px;bottom:12px;width:94px;height:94px}
+ body.touch-device .stick .nub{width:40px;height:40px}
+ body.touch-device #touchActions{right:7px;bottom:8px;grid-template-columns:repeat(2,50px);gap:4px}
+ body.touch-device #touchActions button{width:50px;height:36px;min-height:36px;font-size:9px;padding:0 2px}
+ body.touch-device #touchActions button.wide{height:28px;min-height:28px}
+ body.touch-device #miniMap{left:8px;bottom:116px;width:88px;height:88px}
+ body.touch-device #bottomInfo{bottom:114px;font-size:9px;padding:5px 7px;max-width:60vw}
+ body.touch-device #trainerToggle{font-size:10px;padding:7px 8px}
+}
+@media(max-width:380px){
+ body.touch-device #lookStick{right:114px;width:86px;height:86px}
+ body.touch-device #moveStick{width:86px;height:86px}
+ body.touch-device #touchActions{grid-template-columns:repeat(2,46px)}
+ body.touch-device #touchActions button{width:46px;font-size:9px}
+ body.touch-device #touchActions button.wide{width:100%}
+ body.touch-device #status{max-width:52vw}
+}
+@media(max-height:480px) and (orientation:landscape){
+ body.touch-device #miniMap{width:72px;height:72px;bottom:101px}
+ body.touch-device #bottomInfo{bottom:101px}
+ body.touch-device #moveStick,body.touch-device #lookStick{width:78px;height:78px;bottom:7px}
+ body.touch-device #lookStick{right:116px}
+ body.touch-device .stick .nub{width:34px;height:34px}
+ body.touch-device #touchActions{bottom:6px;right:6px;grid-template-columns:repeat(2,44px);gap:3px}
+ body.touch-device #touchActions button{width:44px;height:28px;min-height:28px;font-size:9px}
+ body.touch-device #touchActions button.wide{height:23px;min-height:23px}
+ body.touch-device #status{top:61px}
+ body.touch-device #trainer{max-height:calc(100dvh - 48px);top:42px}
+}
+
+#crosshair,#attackTouch,#weaponTouch,#oneHitBtn,#unlockBtn,#spawnBoxers,#spawnTactical{display:none!important}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+  <div class="topbar">
+    <div class="chip">現金 <b id="money">$2,500</b></div>
+    <div class="chip">生命 <b id="healthText">100 / 100</b><div class="bar"><i id="healthBar"></i></div></div>
+    <div class="chip">模式 <b id="weaponText">自由探索</b><b id="ammoText" style="display:none">—</b></div>
+    <div class="chip">通緝 <span id="wanted">☆☆☆☆☆</span></div>
+  </div>
+  <div id="status">城市載入中…</div>
+  <button id="trainerToggle">⚙️ 外掛面板</button>
+  <div id="trainer">
+    <div class="panelHead"><strong>⚙ TRAINER / MOD MENU</strong><button id="closeTrainer" aria-label="關閉">✕</button></div>
+    <div class="sectionTitle">玩家作弊</div>
+    <div class="btnGrid">
+      <button class="good" id="godBtn">🛡️ 無敵模式：關</button><button class="good" id="speedBtn">⚡ 超級神速：關</button>
+      <button class="danger" id="oneHitBtn" style="display:none">停用</button><button class="good" id="healBtn">💚 瞬間補滿</button>
+    </div>
+    <div class="sectionTitle">金錢自訂</div>
+    <div class="btnGrid"><button class="gold" id="cash100">💵 +$100,000</button><button class="gold" id="cashMax">💰 設為 $9,999,999</button><button id="cashZero">清空金錢</button><button id="wantedZero">🚫 清除通緝（0 星）</button><button class="danger" id="wantedMax">🚓 開始警車追逐挑戰</button><button class="good" id="unlockBtn" style="display:none">停用</button></div>
+    <div class="sectionTitle">萬能召喚儀 SPAWNER</div>
+    <div class="btnGrid"><button id="spawnCar">🏎️ 召喚超級跑車</button><button id="spawnPolice">🚓 召喚警車</button><button id="spawnBoxers" style="display:none">停用</button><button id="spawnTactical" style="display:none">停用</button></div>
+    <div class="sectionTitle">直接設定</div>
+    <div class="settingrow"><input id="cashInput" type="number" min="0" max="99999999" value="2500" aria-label="設定現金"><button id="cashSet">設定現金</button></div>
+    <div class="settingrow"><button id="fullscreenBtn" style="width:100%">⛶ 切換全螢幕</button></div><p style="color:#93aabc;font-size:11px;line-height:1.45;margin:10px 1px 1px">快捷鍵：F8／~ 開關面板；Shift 奔跑；F 開啟／離開車輛；E 接取配送任務。地圖約 940 × 940 遊戲單位。</p>
+  </div>
+  <canvas id="miniMap" width="176" height="176" aria-label="城市小地圖"></canvas>
+  <div id="crosshair" style="display:none"></div>
+  <div id="toast"></div>
+  <div id="bottomInfo">WASD 移動 · 滑鼠視角 · F 上車／下車 · E 任務互動 · Shift 奔跑</div>
+</div>
+<div id="touchUI">
+  <div class="stick" id="moveStick"><small>移動</small><div class="nub"></div></div>
+  <div class="stick" id="lookStick"><small>視角</small><div class="nub"></div></div>
+  <div id="mobileTip">拖曳右搖桿轉向；上方空白區也可滑動視角</div>
+  <div id="touchActions">
+    <button class="attack" id="attackTouch" style="display:none">停用</button><button id="carTouch">上車／下車</button>
+    <button class="interact" id="interactTouch">互動／任務</button><button id="weaponTouch" style="display:none">停用</button>
+    <button class="wide" id="runTouch">奔跑：關</button><button class="wide" id="jumpTouch">跳躍</button>
+  </div>
+</div>
+<div id="startCover">
+  <div id="startCard">
+    <h1><span>OPEN CITY</span><br>RISE</h1>
+    <p>大型 3D 開放城市探索：步行穿梭街區、駕駛車輛、與 NPC 互動、完成配送任務、挑戰警車追逐。專注探索與駕駛，不含武器或戰鬥系統。手機與電腦共用操作。</p>
+    <p><b>電腦：</b>WASD 移動、滑鼠轉視角、Shift 奔跑、空白鍵跳躍、F 上車／下車、E 接取任務、F8 開啟設定面板。<br><b>手機／平板：</b>左搖桿移動、右搖桿轉視角，右側按鈕用於互動、上車與奔跑。支援橫向／直向自適應。</p>
+    <div class="startrow"><button id="startBtn">進入城市 ▶</button><span style="font-size:11px;color:#92a9bb">建議使用橫向全螢幕遊玩</span></div>
+    <p id="bootError" role="status" style="display:none;color:#ffb8c0;background:#4a1721aa;border:1px solid #ff718455;border-radius:9px;padding:10px;margin:12px 0 0;font-size:12px;white-space:pre-wrap"></p>
+  </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const touchPointer=()=>matchMedia('(pointer: coarse)').matches||('ontouchstart' in window)||innerWidth<760;
+document.body.classList.toggle('touch-device',touchPointer());
+const ui={money:$('money'),healthText:$('healthText'),healthBar:$('healthBar'),weaponText:$('weaponText'),ammoText:$('ammoText'),wanted:$('wanted'),status:$('status'),toast:$('toast'),trainer:$('trainer'),trainerToggle:$('trainerToggle'),bottomInfo:$('bottomInfo')};
+let loadingThree=false,gameInitialized=false,bootFailureShown=false;
+function setBootError(message, retryLoad=false){
+  const box=$('bootError');
+  box.textContent=message;
+  box.style.display='block';
+  $('startBtn').disabled=false;
+  $('startBtn').textContent='重新載入／重試 ▶';
+  $('startBtn').onclick=()=>{
+    box.style.display='none';
+    $('startBtn').textContent='載入中…';
+    if(retryLoad || !window.THREE) loadThree();
+    else location.reload();
+  };
+  ui.status.textContent=message;
+}
+function loadThree(){
+  if(loadingThree) return;
+  if(window.THREE){ bootGame(); return; }
+  loadingThree=true;
+  $('startBtn').disabled=false;
+  $('startBtn').textContent='載入 3D 引擎…';
+  ui.status.textContent='正在載入 3D 引擎，首次開啟需要網路連線…';
+  const sources=[
+    ...(window.openCityDesktop?.isDesktop ? ['./vendor/three.min.js'] : []),
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js',
+    'https://unpkg.com/three@0.160.0/build/three.min.js'
+  ];
+  let index=0;
+  const next=()=>{
+    if(index>=sources.length){
+      loadingThree=false;
+      setBootError('無法載入 Three.js 3D 引擎。請確認裝置已連上網路，並用 Safari／Chrome 開啟 HTML，再按「重新載入／重試」。\n如果你是在檔案預覽視窗內開啟，請改用瀏覽器開啟。', true);
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=sources[index++];
+    script.onload=()=>{
+      loadingThree=false;
+      if(!window.THREE){ next(); return; }
+      $('startBtn').textContent='正在建立城市…';
+      try{bootGame();}catch(err){setBootError('遊戲初始化失敗：'+(err?.message||String(err)), false);}
+    };
+    script.onerror=()=>{script.remove();next();};
+    document.head.appendChild(script);
+  };
+  next();
+}
+$('startBtn').onclick=()=>{
+  if(gameInitialized){return;}
+  if(loadingThree){ui.status.textContent='3D 引擎或城市仍在載入，請稍候片刻。';return;}
+  loadThree();
+};
+window.addEventListener('error',e=>{
+  const message=e?.message||'未知的 JavaScript 錯誤';
+  ui.status.textContent='遊戲錯誤：'+message;
+  if(!gameInitialized && !bootFailureShown){bootFailureShown=true;setBootError('遊戲啟動時發生錯誤：'+message,false);}
+});
+function bootGame(){
+ try{
+  if(!window.THREE) throw new Error('Three.js 尚未載入，請檢查網路連線。');
+  const THREE=window.THREE;
+  const desktopApp=!!window.openCityDesktop?.isDesktop;
+  const lowPowerMode=matchMedia('(pointer: coarse)').matches || innerWidth<820 || (!desktopApp && ((navigator.hardwareConcurrency>0 && navigator.hardwareConcurrency<=4) || (navigator.deviceMemory>0 && navigator.deviceMemory<=8)));
+  document.body.classList.toggle('touch-device', touchPointer());
+  const scene=new THREE.Scene();scene.background=new THREE.Color(0x9ad0e7);scene.fog=new THREE.Fog(0x9ad0e7,lowPowerMode?115:170,lowPowerMode?390:650);
+const camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.1,lowPowerMode?760:1150);
+const renderer=new THREE.WebGLRenderer({antialias:!lowPowerMode,powerPreference:'high-performance',stencil:false,depth:true});const targetRenderFPS=lowPowerMode?40:60;const minRenderInterval=1000/targetRenderFPS;let renderRatioCap=lowPowerMode?0.9:1.25;let currentRenderRatio=Math.min(devicePixelRatio||1,renderRatioCap);renderer.setPixelRatio(currentRenderRatio);renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!lowPowerMode;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;$('game').appendChild(renderer.domElement);
+const hemi=new THREE.HemisphereLight(0xdaf4ff,0x645447,2.0);scene.add(hemi);const sun=new THREE.DirectionalLight(0xffefcf,2.2);sun.position.set(-90,145,70);sun.castShadow=!lowPowerMode;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-145;sun.shadow.camera.right=145;sun.shadow.camera.top=145;sun.shadow.camera.bottom=-145;scene.add(sun);
+const materialCache=new Map();const mat=(color,roughness=.9,extra={})=>{const key=`${color}|${roughness}|${JSON.stringify(extra)}`;if(materialCache.has(key))return materialCache.get(key);const value=new THREE.MeshStandardMaterial({color,roughness,...extra});materialCache.set(key,value);return value;};
+const M={grass:mat(0x8ba36d),road:mat(0x343b43),side:mat(0xc7c4b9),line:mat(0xe7dcb3),concrete:mat(0xaaa99f),dark:mat(0x232d36),skin:mat(0xe8b18c),shirt:[mat(0xe46d59),mat(0x528bc5),mat(0xd6ab45),mat(0x6cab83),mat(0x8b71be),mat(0xd3d6d7)],pants:[mat(0x394b68),mat(0x57554c),mat(0x343943)],car:[mat(0xe55548,.48,{metalness:.1}),mat(0x39a9c9),mat(0xf0be43),mat(0x6bb77b),mat(0xd8dbe0),mat(0x755dd0),mat(0x252d35)]};
+// Correct materials accidentally passed in options form are rebuilt here for predictable colors.
+M.car=[0xe55548,0x39a9c9,0xf0be43,0x6bb77b,0xd8dbe0,0x755dd0,0x252d35].map(c=>mat(c,.48,{metalness:.14}));
+const GRID_RADIUS=8,GRID_STEP=56,CITY_HALF=GRID_RADIUS*GRID_STEP+24;
+const city={half:CITY_HALF,step:GRID_STEP,buildings:[],buildingBuckets:new Map(),shops:[],lamps:[],cars:[],npcs:[],particles:[],stains:[],tracers:[],gridRadius:GRID_RADIUS};
+const visibleRange=lowPowerMode?215:355,visibleRangeSq=visibleRange*visibleRange,simulationRange=lowPowerMode?205:330,simulationRangeSq=simulationRange*simulationRange;
+const ground=new THREE.Mesh(new THREE.PlaneGeometry((city.half+70)*2,(city.half+70)*2),M.grass);ground.rotation.x=-Math.PI/2;ground.position.y=-.22;ground.receiveShadow=true;scene.add(ground);
+const unitBoxGeometry=new THREE.BoxGeometry(1,1,1);function box(parent,w,h,d,material,x=0,y=0,z=0,cast=true){const o=new THREE.Mesh(unitBoxGeometry,material);o.scale.set(w,h,d);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;parent.add(o);return o;}
+const labelMaterialCache=new Map(),labelGeometry=new THREE.PlaneGeometry(7.3,1.82);function makeLabel(text,bg,fg='#fff'){const key=`${text}|${bg}|${fg}`;let m=labelMaterialCache.get(key);if(!m){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle=fg;ctx.font='900 56px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,256,65,490);ctx.strokeStyle='#ffffff66';ctx.lineWidth=7;ctx.strokeRect(4,4,504,120);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;m=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});labelMaterialCache.set(key,m);}return new THREE.Mesh(labelGeometry,m);}
+const facadeWindowMaterial=mat(0x4e7b8b,.36,{metalness:.1,emissive:0x122b35}),windowTrimMaterial=mat(0xddddcf);
+const buildingColorMaterials=new Map(),awningMaterialCache=new Map();
+const serviceSignTypes=new Set(['HOSPITAL','BANK','PARK','24/7','CAFE']);
+function makeBuilding(x,z,w,d,h,type='OFFICE'){
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const color=type==='HOSPITAL'?0xe7e9e4:type==='BANK'?0xa9b9bf:type==='PARK'?0x7b817e:type==='24/7'?0xc5bca0:[0x9c9da0,0xb7a38b,0x8e9da2,0xc6bdb1,0x778e91][Math.floor(Math.random()*5)];
+ if(!buildingColorMaterials.has(color))buildingColorMaterials.set(color,mat(color));const body=box(g,w,h,d,buildingColorMaterials.get(color),0,h/2,0);const roof=box(g,w+.35,.45,d+.35,mat(0x444e58),0,h+.2,0);
+ if(serviceSignTypes.has(type)){const front=makeLabel(type,type==='HOSPITAL'?'#d8e7e5':type==='BANK'?'#2b4f68':type==='PARK'?'#4d3431':type==='24/7'?'#176b5a':'#34434c',type==='HOSPITAL'?'#d52f3e':'#fff');front.position.set(0,Math.min(h-.7,3.8),d/2+.025);g.add(front);}
+ const winMat=facadeWindowMaterial;
+ const cols=Math.max(1,Math.min(lowPowerMode?1:3,Math.floor(w/(lowPowerMode?10:5.2)))),rows=Math.min(lowPowerMode?1:3,Math.floor((h-2.4)/(lowPowerMode?5.5:3.8)));
+ for(let ix=0;ix<cols;ix++)for(let iy=0;iy<rows;iy++){
+  const wx=-w/2+(ix+.5)*w/cols,wy=1.5+iy*(lowPowerMode?4:2.25);if(wy>h-1)continue;
+  box(g,Math.min(1.45,w/cols*.68),1.05,.055,winMat,wx,wy,d/2+.012,false);
+  if(!lowPowerMode&&ix%2===0&&w>10)box(g,.055,1.22,.08,windowTrimMaterial,wx,wy,d/2+.045,false);
+ }
+ if(serviceSignTypes.has(type)){const awningColor=type==='24/7'?0x2b9c78:type==='PARK'?0x8c453b:type==='CAFE'?0x697985:type==='HOSPITAL'?0xd6dadd:0x697985;if(!awningMaterialCache.has(awningColor))awningMaterialCache.set(awningColor,mat(awningColor));box(g,w*.64,.24,.85,awningMaterialCache.get(awningColor),0,2.9,d/2+.4,false);}
+ const building={x,z,w,d,h,box:g,type};city.buildings.push(building);const cellKey=`${Math.floor(x/GRID_STEP)},${Math.floor(z/GRID_STEP)}`;if(!city.buildingBuckets.has(cellKey))city.buildingBuckets.set(cellKey,[]);city.buildingBuckets.get(cellKey).push(building);
+ if(type==='24/7'||type==='BANK'||type==='HOSPITAL'||type==='PARK')city.shops.push({x,z,w,d,h,type,group:g});
+ return g;
+}
+// Roads, sidewalks and lane markings.
+const extent=city.half-12;
+// Batch static road surfaces and markings into three GPU draw calls instead of
+// hundreds of independent meshes. All transforms are frozen after creation.
+const roadParts=[],sidewalkParts=[],laneParts=[];
+const addStaticPart=(list,w,h,d,x,y,z)=>list.push({w,h,d,x,y,z});
+function addStaticBatch(material,parts,receiveShadow=false){
+ if(!parts.length)return null;
+ const mesh=new THREE.InstancedMesh(unitBoxGeometry,material,parts.length),dummy=new THREE.Object3D();
+ for(let i=0;i<parts.length;i++){const v=parts[i];dummy.position.set(v.x,v.y,v.z);dummy.rotation.set(0,0,0);dummy.scale.set(v.w,v.h,v.d);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}
+ mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);mesh.castShadow=false;mesh.receiveShadow=receiveShadow;mesh.computeBoundingSphere();scene.add(mesh);return mesh;
+}
+for(let k=-GRID_RADIUS;k<=GRID_RADIUS;k++){
+ const p=k*GRID_STEP;
+ addStaticPart(roadParts,10,.08,extent*2,p,-.08,0);
+ addStaticPart(roadParts,extent*2,.08,10,0,-.08,p);
+ for(const off of [-6.2,6.2]){
+  addStaticPart(sidewalkParts,2.2,.13,extent*2,p+off,-.02,0);
+  addStaticPart(sidewalkParts,extent*2,.13,2.2,0,-.02,p+off);
+ }
+ for(let q=-GRID_RADIUS;q<=GRID_RADIUS;q+=(lowPowerMode?4:2)){
+  const a=q*GRID_STEP;
+  addStaticPart(laneParts,4,.025,.18,p,-.025,a);
+  addStaticPart(laneParts,.18,.025,4,a,-.025,p);
+ }
+}
+addStaticBatch(M.road,roadParts);
+addStaticBatch(M.side,sidewalkParts,true);
+addStaticBatch(M.line,laneParts);
+// Shared tree-crown geometry also reduces GPU-resource duplication across the city.
+const treeCrownGeometry=new THREE.IcosahedronGeometry(2.6,0);
+// Low-poly blocks and guaranteed service locations.
+const specials=[{x:-GRID_STEP*1.5,z:-GRID_STEP*1.5,t:'24/7'},{x:GRID_STEP*1.5,z:-GRID_STEP*1.5,t:'BANK'},{x:-GRID_STEP*1.5,z:GRID_STEP*1.5,t:'HOSPITAL'},{x:GRID_STEP*1.5,z:GRID_STEP*1.5,t:'PARK'}];
+for(let ix=-GRID_RADIUS;ix<GRID_RADIUS;ix++)for(let iz=-GRID_RADIUS;iz<GRID_RADIUS;iz++){
+ const cx=ix*GRID_STEP+GRID_STEP/2,cz=iz*GRID_STEP+GRID_STEP/2;let special=specials.find(s=>Math.abs(s.x-cx)<.1&&Math.abs(s.z-cz)<.1);
+ if(special){makeBuilding(cx,cz,17,15,special.t==='HOSPITAL'?17: special.t==='BANK'?15:8,special.t);if(special.t==='24/7')makeBuilding(cx+10,cz+7,7,7,6,'CAFE');continue;}
+ const count=lowPowerMode?1:(Math.random()<.38?2:1);
+ for(let n=0;n<count;n++){
+  const w=count===1?12+Math.random()*9:7+Math.random()*5,d=count===1?12+Math.random()*8:7+Math.random()*6,h=6+Math.random()*Math.random()*31;
+  const bx=cx+(count===1?0:(n===0?-7:7)),bz=cz+(Math.random()-.5)*5;
+  makeBuilding(bx,bz,w,d,h,['OFFICE','APARTMENTS','HOTEL','MARKET'][Math.floor(Math.random()*4)]);
+ }
+ // Small park/tree in occasional blocks.
+ if(Math.random()<(lowPowerMode?.07:.14)){const tx=cx+(Math.random()-.5)*15,tz=cz+(Math.random()-.5)*15;const trunk=mat(0x78543a),leaf=mat(0x3e8555);box(scene,.8,3,.8,trunk,tx,1.5,tz);const crown=new THREE.Mesh(treeCrownGeometry,leaf);crown.position.set(tx,4,tz);crown.castShadow=true;scene.add(crown);}
+}
+// Batch every street light into three instanced meshes (pole, arm, glow),
+// so a large city needs three lamp draw calls rather than three per light.
+const lampGlowGeometry=new THREE.BoxGeometry(.55,.22,.38),lampGlowMaterial=new THREE.MeshBasicMaterial({color:0xffedb1}),lampMetalMaterial=mat(0x414b52,.6,{metalness:.35});
+function makeLamp(x,z){city.lamps.push({x,z,visible:undefined});}
+for(let x=-GRID_RADIUS;x<=GRID_RADIUS;x++)for(let z=-GRID_RADIUS;z<=GRID_RADIUS;z++)if((x+z)%(lowPowerMode?5:2)===0)makeLamp(x*GRID_STEP+7,z*GRID_STEP+7);
+const lampPoleInstances=new THREE.InstancedMesh(unitBoxGeometry,lampMetalMaterial,city.lamps.length);
+const lampArmInstances=new THREE.InstancedMesh(unitBoxGeometry,lampMetalMaterial,city.lamps.length);
+const lampGlowInstances=new THREE.InstancedMesh(lampGlowGeometry,lampGlowMaterial,city.lamps.length);
+for(const mesh of [lampPoleInstances,lampArmInstances,lampGlowInstances]){mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);mesh.castShadow=false;mesh.receiveShadow=false;scene.add(mesh);}
+const lampDummy=new THREE.Object3D();
+function setLampVisible(index,visible){
+ const lamp=city.lamps[index];if(lamp.visible===visible)return;lamp.visible=visible;
+ lampDummy.position.set(lamp.x,2.25,lamp.z);lampDummy.rotation.set(0,0,0);lampDummy.scale.set(visible ? 0.18 : 0,visible ? 4.5 : 0,visible ? 0.18 : 0);lampDummy.updateMatrix();lampPoleInstances.setMatrixAt(index,lampDummy.matrix);
+ lampDummy.position.set(lamp.x+.58,4.35,lamp.z);lampDummy.scale.set(visible ? 1.4 : 0,visible ? 0.14 : 0,visible ? 0.14 : 0);lampDummy.updateMatrix();lampArmInstances.setMatrixAt(index,lampDummy.matrix);
+ lampDummy.position.set(lamp.x+1.12,4.22,lamp.z);lampDummy.scale.setScalar(visible ? 1 : 0);lampDummy.updateMatrix();lampGlowInstances.setMatrixAt(index,lampDummy.matrix);
+ lampPoleInstances.instanceMatrix.needsUpdate=true;lampArmInstances.instanceMatrix.needsUpdate=true;lampGlowInstances.instanceMatrix.needsUpdate=true;
+}
+for(let i=0;i<city.lamps.length;i++)setLampVisible(i,false);
+// Rounded humanoid rig: capsules, joints, facial silhouette and independently animated limbs.
+const humanGeo={
+ torso:new THREE.CapsuleGeometry(.31,.53,4,10),
+ arm:new THREE.CapsuleGeometry(.105,.34,4,8),
+ leg:new THREE.CapsuleGeometry(.13,.40,4,8),
+ head:new THREE.SphereGeometry(1,lowPowerMode?10:14,10),
+ hair:new THREE.SphereGeometry(1,lowPowerMode?8:12,8),
+ hand:new THREE.SphereGeometry(1,8,6),
+ neck:new THREE.CylinderGeometry(.105,.13,.20,8),
+ foot:new THREE.SphereGeometry(1,8,6)
+};
+function makeHuman(kind='civilian'){
+ const g=new THREE.Group();
+ const skin=mat(kind==='tactical'?0xc49a7c:[0xe5b18d,0xc9906b,0xf0c7a3,0x9f684d][Math.floor(Math.random()*4)]);
+ const shirt=kind==='tactical'?mat(0x303d46):kind==='boxer'?mat(0xb84b42):M.shirt[Math.floor(Math.random()*M.shirt.length)];
+ const pants=kind==='tactical'?mat(0x29343d):M.pants[Math.floor(Math.random()*M.pants.length)],shoe=mat(kind==='tactical'?0x20272c:0x292b30);
+ const torso=new THREE.Mesh(humanGeo.torso,shirt);torso.position.y=1.43;torso.castShadow=true;torso.receiveShadow=true;g.add(torso);
+ const neck=new THREE.Mesh(humanGeo.neck,skin);neck.position.y=1.99;g.add(neck);
+ const head=new THREE.Mesh(humanGeo.head,skin);head.position.set(0,2.19,0);head.scale.set(.255,.315,.245);head.castShadow=true;g.add(head);
+ const hairMat=mat(kind==='tactical'?0x292d31:[0x30251f,0x5c3927,0x17191d,0x72543a][Math.floor(Math.random()*4)]);
+ const hair=new THREE.Mesh(humanGeo.hair,hairMat);hair.position.set(0,2.39,.012);hair.scale.set(.258,.145,.25);g.add(hair);
+ // Ears and a subtle front-facing face plane create a less mannequin-like head.
+ for(const side of [-1,1]){const ear=new THREE.Mesh(humanGeo.hand,skin);ear.position.set(side*.253,2.18,0);ear.scale.set(.045,.07,.05);g.add(ear);}
+ const faceMat=mat(0xf3d0b5,.95);const face=new THREE.Mesh(humanGeo.hand,faceMat);face.position.set(0,2.19,-.235);face.scale.set(.12,.11,.025);g.add(face);
+ const eyeMat=new THREE.MeshBasicMaterial({color:0x29231f});
+ for(const side of [-1,1]){const eye=new THREE.Mesh(humanGeo.hand,eyeMat);eye.position.set(side*.078,2.225,-.257);eye.scale.set(.018,.022,.012);g.add(eye);}
+ const legL=new THREE.Group(),legR=new THREE.Group();legL.position.set(-.18,.91,0);legR.position.set(.18,.91,0);g.add(legL,legR);
+ for(const leg of [legL,legR]){const limb=new THREE.Mesh(humanGeo.leg,pants);limb.position.y=-.34;limb.castShadow=true;leg.add(limb);const shoeMesh=new THREE.Mesh(humanGeo.foot,shoe);shoeMesh.position.set(0,-.76,-.09);shoeMesh.scale.set(.145,.09,.235);leg.add(shoeMesh);}
+ const armL=new THREE.Group(),armR=new THREE.Group();armL.position.set(-.375,1.72,0);armR.position.set(.375,1.72,0);g.add(armL,armR);
+ for(const [arm,side] of [[armL,-1],[armR,1]]){const shoulder=new THREE.Mesh(humanGeo.hand,shirt);shoulder.position.set(-side*.015,-.015,0);shoulder.scale.set(.145,.16,.15);arm.add(shoulder);const limb=new THREE.Mesh(humanGeo.arm,shirt);limb.position.y=-.29;limb.castShadow=true;arm.add(limb);const hand=new THREE.Mesh(humanGeo.hand,skin);hand.position.set(0,-.59,-.005);hand.scale.set(.09,.105,.09);arm.add(hand);}
+ // Small clothing details distinguish jackets and tactical vests without block-shaped bodies.
+ const collar=box(g,.26,.09,.12,kind==='tactical'?mat(0x7d898e):mat(0x323b43),0,1.88,-.16,false);
+ if(kind==='tactical'){
+   const vest=box(g,.44,.48,.13,mat(0x495a5f),0,1.42,-.22,false);vest.rotation.x=-.04;
+   box(g,.16,.12,.025,mat(0x9ba9a5),0,1.55,-.295,false);
+   box(g,.12,.13,.12,mat(0x202a30),.21,1.49,-.1,false);
+ }
+ g.userData.parts={torso,head,legL,legR,armL,armR};g.userData.kind=kind;g.userData.hp=kind==='tactical'?150:kind==='boxer'?130:100;g.userData.dead=false;g.userData.vx=0;g.userData.vz=0;g.userData.wander=0;return g;
+}
+const player={group:makeHuman('civilian'),health:100,maxHealth:100,money:2500,wanted:0,weapon:0,ammo:999,unlocked:false,god:false,speed:false,oneHit:false,sprinting:false,inCar:null,yaw:0,velocity:new THREE.Vector3(),onGround:true};
+player.group.position.set(0,0,5);scene.add(player.group);player.group.scale.setScalar(1.05);
+const weaponNames=['自由探索'];
+const weaponAmmo=[Infinity];
+const weapons=[];
+const weaponRig=new THREE.Group();
+weaponRig.visible=false;
+player.group.add(weaponRig);
+function syncWeaponVisual(){}
+// Lightweight articulated traffic driver. Shared geometries avoid allocating repeated identical driver meshes.
+const simpleDriverGeo={torso:new THREE.CapsuleGeometry(.28,.42,2,6),head:new THREE.SphereGeometry(.22,8,6),limb:new THREE.CapsuleGeometry(.105,.34,2,6),arm:new THREE.CapsuleGeometry(.08,.30,2,6)};
+function makeSimpleDriver(){
+ const g=new THREE.Group(),skin=mat(0xc9906b),shirt=M.shirt[Math.floor(Math.random()*M.shirt.length)],pants=M.pants[Math.floor(Math.random()*M.pants.length)];
+ const torso=new THREE.Mesh(simpleDriverGeo.torso,shirt);torso.position.y=1.42;g.add(torso);
+ const head=new THREE.Mesh(simpleDriverGeo.head,skin);head.position.y=2.02;g.add(head);
+ const legL=new THREE.Group(),legR=new THREE.Group();legL.position.set(-.15,.95,0);legR.position.set(.15,.95,0);g.add(legL,legR);
+ for(const leg of [legL,legR]){const m=new THREE.Mesh(simpleDriverGeo.limb,pants);m.position.y=-.30;leg.add(m);}
+ const armL=new THREE.Group(),armR=new THREE.Group();armL.position.set(-.31,1.68,0);armR.position.set(.31,1.68,0);g.add(armL,armR);for(const arm of [armL,armR]){const m=new THREE.Mesh(simpleDriverGeo.arm,shirt);m.position.y=-.19;arm.add(m);}
+ g.userData.parts={torso,head,legL,legR,armL,armR};g.userData.kind='civilian';g.userData.hp=100;g.userData.dead=false;g.userData.vx=0;g.userData.vz=0;g.userData.wander=0;return g;
+}
+// Shared wheel geometry reduces resource and setup overhead for traffic.
+const wheelGeometry=new THREE.CylinderGeometry(.36,.36,.22,8),wheelHubGeometry=new THREE.CylinderGeometry(.16,.16,.235,8);
+// Vehicles.
+function makeCar(colorIndex=0,police=false,sport=false){
+ const g=new THREE.Group();const color=police?mat(0xe8ecef,.35,{metalness:.18}):M.car[(colorIndex+M.car.length)%M.car.length];
+ const length=sport?4.6:4.1,width=sport?1.9:1.85;
+ box(g,width,.65,length,color,0,.72,0);box(g,width*.76,.58,length*.46,mat(police?0x1e313c:0x6aa0b4,.25,{metalness:.15,transparent:true,opacity:.9}),0,1.28,-.22);
+ box(g,width*.92,.14,length*.32,police?mat(0x232a32):mat(0x20282e),0,.43,-.12);
+ const wheelMat=mat(0x171b20,.8),hub=mat(0x9da9ac,.4,{metalness:.4});
+ const wheels=[];for(const x of [-width/2-.03,width/2+.03])for(const z of [-length*.31,length*.31]){const wheel=new THREE.Mesh(wheelGeometry,wheelMat);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.37,z);wheel.castShadow=true;g.add(wheel);wheels.push(wheel);const h=new THREE.Mesh(wheelHubGeometry,hub);h.rotation.z=Math.PI/2;h.position.copy(wheel.position);g.add(h);}
+ const headMat=new THREE.MeshBasicMaterial({color:0xfff2bc});box(g,.33,.16,.08,headMat,-.53,.72,-length/2-.035,false);box(g,.33,.16,.08,headMat,.53,.72,-length/2-.035,false);
+ const tail=mat(0xff4747,.5,{emissive:0x8b0000});box(g,.34,.14,.07,tail,-.55,.7,length/2+.025,false);box(g,.34,.14,.07,tail,.55,.7,length/2+.025,false);
+ const driver=makeSimpleDriver();driver.scale.setScalar(.34);driver.position.set(0,.58,-.12);g.add(driver);
+ let siren=null;if(police){siren=new THREE.Group();const r=new THREE.Mesh(new THREE.BoxGeometry(.42,.15,.18),new THREE.MeshBasicMaterial({color:0xff2037}));r.position.x=-.23;const b=new THREE.Mesh(new THREE.BoxGeometry(.42,.15,.18),new THREE.MeshBasicMaterial({color:0x3388ff}));b.position.x=.23;siren.add(r,b);siren.position.y=1.65;g.add(siren);}
+ g.userData={wheels,police,sport,length,width,siren,speed:0,axis:'x',dir:Math.random()<.5?1:-1,road:0,driver,occupied:false,hp:100};scene.add(g);return g;
+}
+function addCar(x,z,opts={}){const c=makeCar(opts.color||0,!!opts.police,!!opts.sport);c.position.set(x,0,z);c.rotation.y=opts.yaw||0;c.userData.speed=opts.speed??(opts.police?8:5+Math.random()*4);c.userData.axis=opts.axis||'x';c.userData.road=opts.road??0;c.userData.dir=opts.dir||1;city.cars.push(c);return c;}
+for(let i=0;i<(lowPowerMode?10:24);i++){
+ const axis=Math.random()<.5?'x':'z',road=(Math.floor(Math.random()*(GRID_RADIUS*2+1))-GRID_RADIUS)*GRID_STEP,lane=(Math.random()<.5?-1:1)*2.8,along=(Math.random()*2-1)*(city.half-55);
+ const c=addCar(axis==='x'?along:road+lane,axis==='x'?road+lane:along,{axis,road:road+lane,dir:Math.random()<.5?-1:1,color:Math.floor(Math.random()*M.car.length),yaw:axis==='x'?(Math.random()<.5?Math.PI/2:-Math.PI/2):(Math.random()<.5?0:Math.PI)});
+}
+// NPCs around sidewalks / plazas.
+function isOnRoad(x,z){return Math.abs(Math.round(x/GRID_STEP)*GRID_STEP-x)<6||Math.abs(Math.round(z/GRID_STEP)*GRID_STEP-z)<6;}
+function randomWalkPoint(){const ix=Math.floor(Math.random()*(GRID_RADIUS*2))-GRID_RADIUS,iz=Math.floor(Math.random()*(GRID_RADIUS*2))-GRID_RADIUS;let x=ix*GRID_STEP+12+Math.random()*(GRID_STEP-24),z=iz*GRID_STEP+12+Math.random()*(GRID_STEP-24);if(Math.random()<.5)x=ix*GRID_STEP+(Math.random()<.5?9:GRID_STEP-9);else z=iz*GRID_STEP+(Math.random()<.5?9:GRID_STEP-9);return [THREE.MathUtils.clamp(x,-city.half+15,city.half-15),THREE.MathUtils.clamp(z,-city.half+15,city.half-15)];}
+function addNPC(kind='civilian',x,z){const n=makeHuman(kind);if(x==null||z==null){const p=randomWalkPoint();x=p[0];z=p[1];}n.position.set(x,0,z);n.userData.targetX=x+(Math.random()-.5)*14;n.userData.targetZ=z+(Math.random()-.5)*14;n.userData.walkSpeed=kind==='tactical'?2.4:1.0+Math.random()*1.1;scene.add(n);city.npcs.push(n);return n;}
+const npcTarget=lowPowerMode?26:44;for(let i=0;i<npcTarget;i++)addNPC();
+// Audio synth; starts after the player's first real input.
+let audioCtx=null,engineOsc=null,engineGain=null,sirenTimer=0;function initAudio(){if(audioCtx)return;try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq=440,duration=.12,type='sine',gain=.06,slide=0){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),audioCtx.currentTime+duration);g.gain.setValueAtTime(gain,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration+.02);}
+function noise(duration=.12,gain=.1){if(!audioCtx)return;const n=Math.floor(audioCtx.sampleRate*duration),buffer=audioCtx.createBuffer(1,n,audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.value=gain;src.connect(g);g.connect(audioCtx.destination);src.start();}
+function playSound(type){initAudio();if(audioCtx?.state==='suspended')audioCtx.resume();if(type==='knife'){tone(510,.09,'sawtooth',.05,-390);noise(.09,.045);}else if(type==='gun'){noise(.13,.19);tone(105,.12,'square',.06,-55);}else if(type==='coin'){tone(860,.08,'sine',.08,180);setTimeout(()=>tone(1250,.12,'sine',.06,100),65);}else if(type==='engine'){tone(75+Math.random()*25,.1,'sawtooth',.018,30);}else if(type==='siren'){tone(sirenTimer%2?620:880,.22,'sawtooth',.025);}else if(type==='hit'){tone(180,.09,'triangle',.06,-100);}else if(type==='jump'){tone(320,.1,'sine',.04,220);}}
+
+function toast(msg){ui.toast.textContent=msg;ui.toast.style.opacity='1';clearTimeout(toast.timer);toast.timer=setTimeout(()=>ui.toast.style.opacity='0',2200);ui.status.textContent=msg;}
+let toastTimer=0;function setStatus(msg){ui.status.textContent=msg;}
+function updateHUD(){ui.money.textContent='$'+Math.floor(player.money).toLocaleString('en-US');ui.healthText.textContent=Math.max(0,Math.round(player.health))+' / '+player.maxHealth;ui.healthBar.style.width=Math.max(0,player.health/player.maxHealth*100)+'%';ui.healthBar.style.background=player.health<30?'#ff6276':'linear-gradient(90deg,#48e6af,#b8ff9c)';ui.weaponText.textContent='自由探索';ui.ammoText.textContent='—';ui.wanted.innerHTML=Array.from({length:5},(_,i)=>`<span class="${i<player.wanted?'on':''}">${i<player.wanted?'★':'☆'}</span>`).join('');}
+function setWanted(n){const old=player.wanted;player.wanted=Math.max(0,Math.min(5,n|0));updateHUD();if(player.wanted>old){toast('犯罪警報！通緝等級 '+player.wanted+' 星');for(let i=0;i<Math.max(0,player.wanted-city.cars.filter(c=>c.userData.police).length);i++)spawnPoliceNear();}else if(!player.wanted){toast('通緝已清除。警察停止追捕。');} }
+function spawnPoliceNear(){const p=player.group.position;const c=addCar(p.x+(Math.random()<.5?-1:1)*(20+Math.random()*18),p.z+(Math.random()-.5)*35,{police:true,color:0,yaw:Math.random()*Math.PI*2,speed:11+Math.random()*4});c.userData.axis='pursuit';c.userData.speed=12;return c;}
+function setWeapon(){player.weapon=0;syncWeaponVisual();updateHUD();}
+function forwardVector(){return new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)).normalize();}
+// City exploration missions: timed deliveries award cash without initiating crimes.
+let delivery=null;
+function interact(){
+ const p=player.group.position;let near=null,best=Infinity;
+ for(const s of city.shops){const d=Math.hypot(p.x-s.x,p.z-s.z);if(d<Math.max(s.w,s.d)*.75+3&&d<best){near=s;best=d;}}
+ if(near&&(near.type==='24/7'||near.type==='BANK')){
+  if(delivery){toast('配送任務進行中… '+Math.ceil(delivery.left)+' 秒');return;}
+  delivery={shop:near,left:near.type==='BANK'?8:5};
+  toast((near.type==='BANK'?'銀行文件運送':'便利商店補貨配送')+'任務開始！完成倒數即可領取報酬。');
+  return;
+ }
+ if(near){
+  if(near.type==='HOSPITAL'){player.health=player.maxHealth;updateHUD();toast('醫院休息完成，生命值已恢復。');playSound('coin');return;}
+  if(near.type==='PARK'){toast('已抵達城市公園，適合休息與探索。');return;}
+  toast('這裡可以探索，但目前沒有特殊服務。');return;
+ }
+ let closestCar=null,cd=5;
+ for(const c of city.cars){const d=c.position.distanceTo(p);if(d<cd){cd=d;closestCar=c;}}
+ if(closestCar){toggleCar(closestCar);return;}
+ toast('靠近便利商店／銀行接取配送任務，或靠近車輛再按 E。');
+}
+
+function toggleCar(car){if(player.inCar){player.inCar.userData.occupied=false;player.inCar.userData.speed*=.45;player.inCar=null;player.group.visible=true;const p=player.group.position;toast('已下車。');return;}
+ if(car.userData.occupied){toast('這輛車正在使用中。');return;}if(car.userData.police&&player.wanted===0){toast('警車目前正在執勤，請先開始追逐挑戰。');return;}if(car.userData.driver){const d=car.userData.driver;car.remove(d);d.scale.setScalar(1);d.position.set(car.position.x+(car.position.x>=0?2.1:-2.1),0,car.position.z+1.1);d.userData.targetX=d.position.x+(Math.random()-.5)*12;d.userData.targetZ=d.position.z+(Math.random()-.5)*12;d.userData.wander=2;scene.add(d);city.npcs.push(d);car.userData.driver=null;}car.userData.occupied=true;player.inCar=car;player.group.visible=false;toast(car.userData.police?'已進入警車。':'你已上車！');}
+// Trainer logic.
+function setToggle(id,prop,label){$(id).addEventListener('click',()=>{player[prop]=!player[prop];$(id).textContent=label+'：'+(player[prop]?'開':'關');toast(label+(player[prop]?'已啟用':'已關閉'));});}
+setToggle('godBtn','god','🛡️ 無敵模式');setToggle('speedBtn','speed','⚡ 超級神速');
+$('healBtn').onclick=()=>{player.health=player.maxHealth;updateHUD();toast('生命值已瞬間補滿！');playSound('coin');};$('cash100').onclick=()=>{player.money+=100000;updateHUD();playSound('coin');toast('已增加 $100,000');};$('cashMax').onclick=()=>{player.money=9999999;updateHUD();playSound('coin');toast('現金已設為 $9,999,999');};$('cashZero').onclick=()=>{player.money=0;updateHUD();toast('現金已歸零');};$('cashSet').onclick=()=>{player.money=Math.max(0,Math.min(99999999,Number($('cashInput').value)||0));updateHUD();toast('現金設定完成');};$('wantedZero').onclick=()=>setWanted(0);$('wantedMax').onclick=()=>setWanted(5);$('unlockBtn').onclick=()=>{};
+function spawnAhead(distance=8){const p=player.group.position,dir=forwardVector();return {x:p.x+dir.x*distance,z:p.z+dir.z*distance};}
+$('spawnCar').onclick=()=>{const p=spawnAhead(9),c=addCar(p.x,p.z,{sport:true,color:5,yaw:player.yaw,axis:'pursuit',speed:0});toast('超級跑車已在前方生成。');};$('spawnPolice').onclick=()=>{const p=spawnAhead(9);addCar(p.x,p.z,{police:true,yaw:player.yaw,axis:'pursuit',speed:0});toast('警車已在前方生成。');};$('spawnBoxers').onclick=()=>{};$('spawnTactical').onclick=()=>{};
+function toggleTrainer(){ui.trainer.classList.toggle('open');}
+ui.trainerToggle.onclick=toggleTrainer;$('closeTrainer').onclick=()=>ui.trainer.classList.remove('open');
+// Keyboard, mouse, and touch controls.
+const keys=Object.create(null);let pointerLocked=false;let moveInput={x:0,y:0},lookInput={x:0,y:0};let lastLookTouch=null;let jumpVelocity=0;
+const KEY_ALIAS={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',' ':'Space',arrowup:'ArrowUp',arrowdown:'ArrowDown',arrowleft:'ArrowLeft',arrowright:'ArrowRight',shift:'ShiftLeft',escape:'Escape'};
+function gameKeyCode(e){const code=e.code||'';if(code&&code!=='Unidentified')return code;return KEY_ALIAS[String(e.key||'').toLowerCase()]||code;}
+function isTypingTarget(target){return !!target&&(target.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));}
+function clearKeyboardState(){for(const k in keys)keys[k]=false;moveInput={x:0,y:0};lookInput={x:0,y:0};}
+function actionDown(){if(!audioCtx)initAudio();if(audioCtx?.state==='suspended')audioCtx.resume();}
+document.addEventListener('keydown',e=>{
+ if(isTypingTarget(e.target))return;
+ const code=gameKeyCode(e);if(!code)return;
+ keys[code]=true;
+ if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(code))e.preventDefault();
+ actionDown();
+ if(e.repeat)return;
+ switch(code){case'KeyF':toggleCarNear();break;case'KeyE':interact();break;case'F8':case'Backquote':toggleTrainer();break;case'Space':doJump();break;case'KeyP':toggleTrainer();break;}
+},true);
+document.addEventListener('keyup',e=>{const code=gameKeyCode(e);if(code)keys[code]=false;},true);
+window.addEventListener('blur',clearKeyboardState);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearKeyboardState();});
+function toggleCarNear(){if(player.inCar){toggleCar(player.inCar);return;}let near=null,d0=5;for(const c of city.cars){const d=c.position.distanceTo(player.group.position);if(d<d0){d0=d;near=c;}}if(near)toggleCar(near);else toast('靠近車輛再按 F。');}
+renderer.domElement.addEventListener('click',e=>{actionDown();if(!isTouchDevice()&&!ui.trainer.classList.contains('open')){if(!pointerLocked){renderer.domElement.requestPointerLock?.();}}});
+document.addEventListener('pointerlockchange',()=>{pointerLocked=document.pointerLockElement===renderer.domElement;});document.addEventListener('mousemove',e=>{if(pointerLocked){player.yaw-=e.movementX*.00235;cameraPitch=THREE.MathUtils.clamp(cameraPitch+e.movementY*.0018,.12,.72);}});
+function isTouchDevice(){return matchMedia('(pointer:coarse)').matches||('ontouchstart'in window);}
+// Mobile drag camera anywhere outside the control cluster.
+renderer.domElement.addEventListener('touchstart',e=>{actionDown();if(e.target.closest?.('#touchUI'))return;if(e.touches.length){lastLookTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};}},{passive:true});renderer.domElement.addEventListener('touchmove',e=>{if(!lastLookTouch||!e.touches.length)return;const t=e.touches[0],dx=t.clientX-lastLookTouch.x,dy=t.clientY-lastLookTouch.y;player.yaw-=dx*.006;cameraPitch=THREE.MathUtils.clamp(cameraPitch+dy*.003,.12,.72);lastLookTouch={x:t.clientX,y:t.clientY};},{passive:true});renderer.domElement.addEventListener('touchend',()=>lastLookTouch=null,{passive:true});
+function bindStick(id,kind){const el=$(id),nub=el.querySelector('.nub');let active=false,pid=null,center=null;function point(e){const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,max:r.width*.34};}function update(e){const c=center||point(e);let dx=e.clientX-c.x,dy=e.clientY-c.y,len=Math.hypot(dx,dy),max=c.max;if(len>max){dx=dx/len*max;dy=dy/len*max;}nub.style.left=`calc(50% + ${dx}px)`;nub.style.top=`calc(50% + ${dy}px)`;if(kind==='move'){moveInput.x=dx/max;moveInput.y=dy/max;}else{lookInput.x=dx/max;lookInput.y=dy/max;}}
+ function end(){active=false;pid=null;center=null;nub.style.left='50%';nub.style.top='50%';if(kind==='move')moveInput={x:0,y:0};else lookInput={x:0,y:0};}el.addEventListener('pointerdown',e=>{actionDown();active=true;pid=e.pointerId;center=point(e);el.setPointerCapture?.(pid);update(e);e.preventDefault();});el.addEventListener('pointermove',e=>{if(!active||e.pointerId!==pid)return;update(e);e.preventDefault();});el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('lostpointercapture',end);}
+bindStick('moveStick','move');bindStick('lookStick','look');
+$('attackTouch').onclick=()=>{};$('carTouch').onclick=()=>{actionDown();toggleCarNear();};$('interactTouch').onclick=()=>{actionDown();interact();};$('weaponTouch').onclick=()=>{};$('jumpTouch').onclick=doJump;$('runTouch').onclick=()=>{player.sprinting=!player.sprinting;$('runTouch').textContent='奔跑：'+(player.sprinting?'開':'關');$('runTouch').classList.toggle('active',player.sprinting);actionDown();};
+function doJump(){if(!player.onGround)return;jumpVelocity=6;player.onGround=false;playSound('jump');}
+// HUD interaction text per location.
+function nearestHint(){const p=player.group.position;if(player.inCar)return '駕駛中：W/↑ 加速 · S/↓ 減速 · A/D 轉向 · F 下車';let nearest=null,d=999;for(const s of city.shops){const nd=Math.hypot(p.x-s.x,p.z-s.z);if(nd<d){d=nd;nearest=s;}}if(nearest&&d<24){const labels={'24/7':'便利商店：按 E 接取補貨配送','BANK':'銀行：按 E 接取文件配送','HOSPITAL':'醫院：按 E 恢復生命','PARK':'城市公園：休息與探索'};return labels[nearest.type];}let carD=99;for(const c of city.cars)carD=Math.min(carD,c.position.distanceTo(p));return carD<6?'靠近車輛：按 F 上車／下車':'探索城市 · 靠近任務點或建築互動';}
+// Basic collision against building footprints.
+function blocked(x,z,r=.65){const cx=Math.floor(x/GRID_STEP),cz=Math.floor(z/GRID_STEP);for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){const bucket=city.buildingBuckets.get(`${ix},${iz}`);if(!bucket)continue;for(const b of bucket)if(Math.abs(x-b.x)<b.w/2+r&&Math.abs(z-b.z)<b.d/2+r)return true;}return false;}
+let cameraPitch=.34,lastFrame=performance.now(),robberyAccum=0;const clock=new THREE.Clock();
+function updateCars(dt,time){for(const c of city.cars){const u=c.userData;if(u.occupied&&player.inCar===c){const f=(keys.KeyW||keys.ArrowUp?-1:0)+(keys.KeyS||keys.ArrowDown?1:0);const turn=(keys.KeyA||keys.ArrowLeft?1:0)+(keys.KeyD||keys.ArrowRight?-1:0);u.speed=THREE.MathUtils.clamp(u.speed+f*dt*14,-7,23);c.rotation.y+=turn*dt*(.8+Math.abs(u.speed)*.035);c.position.x+=Math.sin(c.rotation.y)*(-u.speed)*dt;c.position.z+=Math.cos(c.rotation.y)*u.speed*dt;for(const w of u.wheels)w.rotation.x+=u.speed*dt*1.6;if(Math.abs(u.speed)>2&&Math.random()<dt*.8)playSound('engine');}
+ else if(u.axis==='pursuit'&&u.police&&player.wanted>0){const target=player.inCar?player.inCar.position:player.group.position;const dx=target.x-c.position.x,dz=target.z-c.position.z,ang=Math.atan2(dx,-dz);let da=((ang-c.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;c.rotation.y+=THREE.MathUtils.clamp(da,-dt*1.45,dt*1.45);u.speed=THREE.MathUtils.clamp(u.speed+dt*2,8,17);c.position.x+=Math.sin(c.rotation.y)*u.speed*dt;c.position.z-=Math.cos(c.rotation.y)*u.speed*dt;if(Math.hypot(dx,dz)<20&&Math.random()<dt*.3){playSound('siren');sirenTimer++;}if(u.siren){u.siren.children[0].visible=(Math.floor(time*8)%2===0);u.siren.children[1].visible=!u.siren.children[0].visible;}}
+ else if(u.axis==='pursuit'&&u.police&&player.wanted===0){u.speed*=Math.pow(.96,dt*60);c.position.x+=Math.sin(c.rotation.y)*u.speed*dt;c.position.z-=Math.cos(c.rotation.y)*u.speed*dt;}
+ else {if(u.axis==='x'){c.position.x+=u.dir*u.speed*dt;if(c.position.x>city.half-15)c.position.x=-city.half+15;if(c.position.x< -city.half+15)c.position.x=city.half-15;c.position.z=u.road;c.rotation.y=u.dir>0?-Math.PI/2:Math.PI/2;}else if(u.axis==='z'){c.position.z+=u.dir*u.speed*dt;if(c.position.z>city.half-15)c.position.z=-city.half+15;if(c.position.z< -city.half+15)c.position.z=city.half-15;c.position.x=u.road;c.rotation.y=u.dir>0?Math.PI:0;}}
+ const observer=player.inCar?player.inCar.position:player.group.position;if(Math.abs(c.position.x-observer.x)>simulationRange||Math.abs(c.position.z-observer.z)>simulationRange)continue;
+ // Collisions and arcade knockback only near the active play area.
+ for(const n of city.npcs){if(n.userData.dead)continue;const dist=c.position.distanceTo(n.position),now=performance.now();if(u.occupied&&player.inCar===c&&dist<1.7&&Math.abs(u.speed)>4&&now>(u.lastNpcBump||0)){u.lastNpcBump=now+1600;u.speed*=.68;setWanted(Math.min(5,player.wanted+1));toast('危險駕駛！警車開始追逐。');}}
+ }}
+function updateNPCs(dt){for(let i=city.npcs.length-1;i>=0;i--){const n=city.npcs[i],u=n.userData;if(u.dead){u.deadTime-=dt;n.position.x+=u.vx*dt*.2;n.position.z+=u.vz*dt*.2;n.position.y=Math.max(.02,n.position.y-dt*.1);if(u.deadTime<=0){scene.remove(n);city.npcs.splice(i,1);if(city.npcs.length<npcTarget)addNPC();}continue;}
+ const observer=player.inCar?player.inCar.position:player.group.position;if(Math.abs(n.position.x-observer.x)>simulationRange||Math.abs(n.position.z-observer.z)>simulationRange)continue;
+ if(u.stun>0){u.stun-=dt;n.position.x+=u.vx*dt;n.position.z+=u.vz*dt;u.vx*=Math.pow(.1,dt);u.vz*=Math.pow(.1,dt);continue;}
+ if(player.wanted>0&&u.kind==='tactical'&&Math.random()<dt*.2){const dx=player.group.position.x-n.position.x,dz=player.group.position.z-n.position.z;const d=Math.hypot(dx,dz);if(d<28){u.targetX=player.group.position.x;u.targetZ=player.group.position.z;}}
+ u.wander-=dt;if(u.wander<=0||Math.hypot(u.targetX-n.position.x,u.targetZ-n.position.z)<1.4){u.wander=2+Math.random()*5;const p=randomWalkPoint();u.targetX=p[0];u.targetZ=p[1];}
+ const dx=u.targetX-n.position.x,dz=u.targetZ-n.position.z,d=Math.hypot(dx,dz);if(d>.2){const step=Math.min(d,u.walkSpeed*dt),nx=n.position.x+dx/d*step,nz=n.position.z+dz/d*step;if(!blocked(nx,nz,.4)){n.position.x=nx;n.position.z=nz;}n.rotation.y=Math.atan2(dx,-dz);const sw=Math.sin(performance.now()*.008+i)*.12;u.parts.legL.rotation.x=sw;u.parts.legR.rotation.x=-sw;u.parts.armL.rotation.x=-sw*.6;u.parts.armR.rotation.x=sw*.6;}
+ }}
+function updatePlayer(dt){const p=player.group.position;if(player.god)player.health=99999;
+ if(!player.inCar){let mx=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+moveInput.x;let my=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+moveInput.y;const len=Math.hypot(mx,my);if(len>1){mx/=len;my/=len;}const speed=player.speed?13.8:((player.sprinting||keys.ShiftLeft||keys.ShiftRight)?7.4:4.6);const f=new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)),r=new THREE.Vector3(Math.cos(player.yaw),0,Math.sin(player.yaw));const dx=(f.x*(-my)+r.x*mx)*speed*dt,dz=(f.z*(-my)+r.z*mx)*speed*dt;let nx=THREE.MathUtils.clamp(p.x+dx,-city.half+10,city.half-10),nz=THREE.MathUtils.clamp(p.z+dz,-city.half+10,city.half-10);if(!blocked(nx,p.z))p.x=nx;if(!blocked(p.x,nz))p.z=nz;if(Math.abs(mx)+Math.abs(my)>.08)player.group.rotation.y=player.yaw;
+  p.y+=jumpVelocity*dt;jumpVelocity-=18*dt;if(p.y<=0){p.y=0;jumpVelocity=0;player.onGround=true;}
+  const gait=Math.sin(performance.now()*.012)*(player.sprinting?0.72:0.43)*Math.min(1,len);const parts=player.group.userData.parts;parts.legL.rotation.x=gait;parts.legR.rotation.x=-gait;parts.armL.rotation.x=-gait*.6;
+  parts.armR.rotation.x=gait*.6;
+ }else{const c=player.inCar;player.group.position.copy(c.position);player.group.position.y=0;player.yaw=c.rotation.y;}
+ // Crash into civilian on foot.
+ if(!player.inCar){for(const n of city.npcs){if(n.userData.dead)continue;if(n.position.distanceTo(p)<.95&&Math.hypot(moveInput.x,moveInput.y)>.2){n.userData.vx=Math.sin(player.yaw)*2.2;n.userData.vz=-Math.cos(player.yaw)*2.2;}}}
+ // Delivery mission countdown
+ if(delivery){delivery.left-=dt;if(delivery.left<=0){const reward=delivery.shop.type==='BANK'?32000+Math.floor(Math.random()*15000):1800+Math.floor(Math.random()*1600);player.money+=reward;updateHUD();playSound('coin');toast('配送任務完成！獲得 $'+reward.toLocaleString('en-US'));delivery=null;}}
+ // camera follow
+ const target=p.clone().add(new THREE.Vector3(0,1.35,0));const dist=player.inCar?10:7.8;const horiz=Math.cos(cameraPitch)*dist;const desired=new THREE.Vector3(p.x+Math.sin(player.yaw)*horiz,p.y+2.1+Math.sin(cameraPitch)*dist,p.z+Math.cos(player.yaw)*horiz);camera.position.lerp(desired,1-Math.pow(.0007,dt));camera.lookAt(target);
+}
+let mapAccum=0,hudAccum=0,hintAccum=0,fpsFrames=0,fpsSampleAt=performance.now(),lastRenderAt=0,visibilityAccum=0,lastMeasuredFps=0,totalRenderedFrames=0;
+function drawMiniMap(){
+ const canvas=$('miniMap');if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
+ const w=canvas.width,h=canvas.height,scale=Math.min(w,h)/(city.half*2);ctx.clearRect(0,0,w,h);ctx.fillStyle='#111a25';ctx.fillRect(0,0,w,h);
+ ctx.strokeStyle='#48515b';ctx.lineWidth=Math.max(1,city.step*scale*.18);
+ for(let i=-GRID_RADIUS;i<=GRID_RADIUS;i++){const at=w/2+i*GRID_STEP*scale;ctx.beginPath();ctx.moveTo(at,0);ctx.lineTo(at,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,at);ctx.lineTo(w,at);ctx.stroke();}
+ ctx.fillStyle='#d9e1e9';for(const b of city.buildings){const x=w/2+b.x*scale,z=h/2+b.z*scale;ctx.fillRect(x-1,z-1,2,2);}
+ for(const shop of city.shops){const x=w/2+shop.x*scale,z=h/2+shop.z*scale;ctx.fillStyle=shop.type==='HOSPITAL'?'#6cffbb':shop.type==='BANK'?'#ffd66b':shop.type==='PARK'?'#ff8294':'#91e9ff';ctx.fillRect(x-2,z-2,4,4);}
+ for(const car of city.cars){if(car.userData.police){const x=w/2+car.position.x*scale,z=h/2+car.position.z*scale;ctx.fillStyle='#ff5268';ctx.fillRect(x-1.5,z-1.5,3,3);}}
+ const p=player.group.position,x=w/2+p.x*scale,z=h/2+p.z*scale;ctx.save();ctx.translate(x,z);ctx.rotate(-player.yaw);ctx.fillStyle='#61efff';ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(4.2,4);ctx.lineTo(0,2.4);ctx.lineTo(-4.2,4);ctx.closePath();ctx.fill();ctx.restore();
+ ctx.strokeStyle='#ffffff32';ctx.lineWidth=2;ctx.strokeRect(1,1,w-2,h-2);
+}
+function updateEffects(dt){for(let i=city.particles.length-1;i>=0;i--){const p=city.particles[i];p.life-=dt;p.v.y-=p.gravity*dt;p.mesh.position.addScaledVector(p.v,dt);p.mesh.scale.setScalar(Math.max(.01,p.life));if(p.life<=0){scene.remove(p.mesh);p.mesh.geometry.dispose();city.particles.splice(i,1);}}
+ for(let i=city.tracers.length-1;i>=0;i--){const t=city.tracers[i];t.life-=dt;if(t.life<=0){scene.remove(t.mesh);t.mesh.geometry?.dispose();if(t.mesh.material){if(Array.isArray(t.mesh.material))t.mesh.material.forEach(m=>m.dispose());else t.mesh.material.dispose();}city.tracers.splice(i,1);}}
+ for(let i=city.stains.length-1;i>=0;i--){const s=city.stains[i];s.life-=dt;s.mesh.material.opacity=Math.min(.43,s.life/32*.43);if(s.life<=0){scene.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();city.stains.splice(i,1);}}
+}
+function updateWorldVisibility(){const pp=player.inCar?player.inCar.position:player.group.position;const lampRangeSq=visibleRangeSq*.82,npcRangeSq=visibleRangeSq*.72,carRangeSq=visibleRangeSq*1.55;for(const b of city.buildings){const dx=b.x-pp.x,dz=b.z-pp.z;b.box.visible=dx*dx+dz*dz<visibleRangeSq;}for(let i=0;i<city.lamps.length;i++){const lamp=city.lamps[i],dx=lamp.x-pp.x,dz=lamp.z-pp.z;setLampVisible(i,dx*dx+dz*dz<lampRangeSq);}for(const n of city.npcs){const dx=n.position.x-pp.x,dz=n.position.z-pp.z;n.visible=n.userData.dead||dx*dx+dz*dz<npcRangeSq;}for(const c of city.cars){const dx=c.position.x-pp.x,dz=c.position.z-pp.z;c.visible=c===player.inCar||dx*dx+dz*dz<carRangeSq;}}
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.04,(now-lastFrame)/1000||.016);lastFrame=now;const time=now/1000;
+ if(lookInput.x||lookInput.y){player.yaw-=lookInput.x*dt*2.4;cameraPitch=THREE.MathUtils.clamp(cameraPitch+lookInput.y*dt*.9,.12,.72);}
+ updatePlayer(dt);updateCars(dt,time);updateNPCs(dt);updateEffects(dt);
+ if(player.wanted>0&&Math.random()<dt*.018){/* Wanted level is persistent until cleared; no surprise instant reset. */}
+ hintAccum+=dt;if(hintAccum>=.35){ui.bottomInfo.textContent=nearestHint();hintAccum=0;}
+ if(player.health<=0&&!player.god){player.health=35;if(player.inCar){player.inCar.userData.occupied=false;player.inCar.userData.speed*=.25;player.inCar=null;}player.group.position.set(0,0,5);player.group.visible=true;setWanted(0);toast('你已在醫院附近重新站起，生命值已恢復部分。');}
+ hudAccum+=dt;if(hudAccum>=.15){updateHUD();hudAccum=0;}mapAccum+=dt;if(mapAccum>.25){drawMiniMap();mapAccum=0;}visibilityAccum+=dt;if(visibilityAccum>.32){updateWorldVisibility();visibilityAccum=0;}if(now-lastRenderAt<minRenderInterval)return;lastRenderAt=now;renderer.render(scene,camera);fpsFrames++;totalRenderedFrames++;if(now-fpsSampleAt>=1800){const fps=fpsFrames*1000/(now-fpsSampleAt);lastMeasuredFps=fps;fpsFrames=0;fpsSampleAt=now;let nextRatio=currentRenderRatio;if(fps<targetRenderFPS*.78&&currentRenderRatio>.55)nextRatio=Math.max(.55,currentRenderRatio-.08);else if(fps>targetRenderFPS*.92&&currentRenderRatio<renderRatioCap)nextRatio=Math.min(renderRatioCap,currentRenderRatio+.035);if(Math.abs(nextRatio-currentRenderRatio)>.001){currentRenderRatio=nextRatio;renderer.setPixelRatio(currentRenderRatio);renderer.setSize(innerWidth,innerHeight,false);setStatus('自動效能調整：渲染比例 '+Math.round(currentRenderRatio*100)+'%');}}
+}
+// Minimal diagnostics used by automated smoke tests; does not change gameplay.
+window.__OPEN_CITY_DEBUG={version:'open-city-rise-perf-1',getStats:()=>({buildings:city.buildings.length,npcs:city.npcs.length,cars:city.cars.length,visibleBuildings:city.buildings.reduce((n,b)=>n+(b.box.visible?1:0),0),drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,renderFPS:lastMeasuredFps,renderedFrames:totalRenderedFrames,renderRatio:currentRenderRatio,lowPowerMode,touchDevice:document.body.classList.contains('touch-device')}),getPlayerPosition:()=>({x:player.group.position.x,y:player.group.position.y,z:player.group.position.z}),getTrainerOpen:()=>ui.trainer.classList.contains('open')};
+// Initial status and responsive renderer.
+updateHUD();updateWorldVisibility();drawMiniMap();setStatus('城市已就緒：256 個街區、17 條縱橫主幹道。已啟用距離剔除與自動畫質調整。');
+addEventListener('resize',()=>{document.body.classList.toggle('touch-device',matchMedia('(pointer: coarse)').matches||innerWidth<760);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(currentRenderRatio);drawMiniMap();});
+addEventListener('orientationchange',()=>setTimeout(()=>{document.body.classList.toggle('touch-device',matchMedia('(pointer: coarse)').matches||innerWidth<760);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);drawMiniMap();},160));
+$('startBtn').onclick=()=>{$('startCover').style.display='none';actionDown();toast(isTouchDevice()?'歡迎來到 OPEN CITY: RISE！256 個街區等你探索。':'城市已就緒：WASD 移動；點擊遊戲場景才會鎖定滑鼠視角，按 Esc 釋放。');if(isTouchDevice()&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});drawMiniMap();};
+gameInitialized=true; $('startBtn').textContent='進入城市 ▶'; $('bootError').style.display='none';
+// Keep desktop interaction usable when the trainer is open and restore game focus when closed.
+$('trainerToggle').addEventListener('click',e=>e.stopPropagation());
+$('fullscreenBtn').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else toast('此瀏覽器不支援網頁全螢幕，仍可全畫面遊玩。');}catch(e){toast('瀏覽器未允許全螢幕，請使用瀏覽器的全螢幕功能。');}});
+requestAnimationFrame(loop);
+ }catch(err){
+   loadingThree=false;
+   setBootError('遊戲初始化失敗：'+(err?.message||String(err))+'。請重新載入；如果問題持續，請確認瀏覽器支援 WebGL。', false);
+ }
+}
+loadThree();
+})();
+</script>
+</body>
+</html>
