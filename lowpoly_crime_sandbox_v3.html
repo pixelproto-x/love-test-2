@@ -519,7 +519,7 @@ function updateWorld(dt,time){
 }
 function renderLoop(){
  requestAnimationFrame(renderLoop);if(!renderer||!scene)return;
- const dt=Math.min(clock.getDelta(),.04),time=clock.elapsedTime;
+ const dt=Math.min(clock.getDelta(),.08),time=clock.elapsedTime;
  if(started)updateWorld(dt,time);
  renderer.render(scene,camera);
 }
