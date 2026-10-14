@@ -273,8 +273,28 @@ function createWorld(){
  buildCollectibles();
  clock=new THREE.Clock();window.__CITYLIFE_READY=true;
 }
+function addInstancedBoxes(w,h,d,color,entries){
+ if(!entries.length)return;
+ const geometry=new THREE.BoxGeometry(w,h,d);
+ const mesh=new THREE.InstancedMesh(geometry,sharedMat(color),entries.length);
+ mesh.castShadow=false;mesh.receiveShadow=false;
+ const dummy=new THREE.Object3D();
+ entries.forEach((p,i)=>{dummy.position.set(p[0],p[1],p[2]);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});
+ mesh.instanceMatrix.needsUpdate=true;scene.add(mesh);return mesh;
+}
 function buildRoads(){
  const roadMat=sharedMat(0x3c4651),sideMat=sharedMat(0xc7c9bb),lineMat=sharedMat(0xf3dda0),whiteMat=sharedMat(0xecefe7);
+ const verticalDashes=[],horizontalDashes=[],crossZebraA=[],crossZebraB=[];
+ for(let p=-120;p<=120;p+=40){
+  for(let z=-142;z<=142;z+=12)verticalDashes.push([p,-.075,z]);
+  for(let x=-142;x<=142;x+=12)horizontalDashes.push([x,-.075,p]);
+ }
+ for(let x of [-80,-40,0,40,80])for(let z of [-80,-40,0,40,80]){
+  for(let i=0;i<5;i++){
+   crossZebraA.push([x-2+i,-.065,z+8.3]);
+   crossZebraB.push([x+8.3,-.065,z-2+i]);
+  }
+ }
  for(let k=-3;k<=3;k++){
   const p=k*40;
   const vr=new THREE.Mesh(new THREE.BoxGeometry(12.8,.09,300),roadMat);vr.position.set(p,-.13,0);scene.add(vr);
@@ -283,23 +303,16 @@ function buildRoads(){
    const s1=box(2.1,.13,300,0xc8c7ba,p+side*7.55,-.06,0);const s2=box(300,.13,2.1,0xc8c7ba,0,-.06,p+side*7.55);
    s1.receiveShadow=s2.receiveShadow=renderer.shadowMap.enabled;
   }
-  // Dashed road dividers make the streets read clearly from the camera.
-  for(let z=-142;z<=142;z+=12){box(.12,.025,4,0xf4d987,p,-.075,z);}
-  for(let x=-142;x<=142;x+=12){box(4,.025,.12,0xf4d987,x,-.075,p);}
  }
- // Zebra crossings at the central junctions and the first objective route.
- const crossAt=[-80,-40,0,40,80];
- for(const x of crossAt)for(const z of crossAt){
-  if(Math.abs(x)>80||Math.abs(z)>80)continue;
-  for(let i=0;i<5;i++){
-   box(.8,.025,5.5,0xf2f1e9,x-2+i,z===0?-.065:-.065,z+8.3);
-   box(5.5,.025,.8,0xf2f1e9,x+8.3,-.065,z-2+i);
-  }
- }
+ // Road marks are instanced in batches to reduce hundreds of individual draw calls.
+ addInstancedBoxes(.12,.025,4,0xf4d987,verticalDashes);
+ addInstancedBoxes(4,.025,.12,0xf4d987,horizontalDashes);
+ addInstancedBoxes(.8,.025,5.5,0xf2f1e9,crossZebraA);
+ addInstancedBoxes(5.5,.025,.8,0xf2f1e9,crossZebraB);
  // Green strips, streetlights and benches give the sidewalks a readable human scale.
- for(let x=-120;x<=120;x+=40)for(const side of [-1,1]){
+ for(let x=-120;x<=120;x+=80)for(const side of [-1,1]){
   const sx=x+side*9.1;
-  for(let z=-120;z<=120;z+=40){
+  for(let z=-120;z<=120;z+=80){
    if(Math.abs(sx)<7&&Math.abs(z)<7)continue;
    addCylinder(.09,.13,3.8,0x4a5b65,sx,1.84,z,scene,7);
    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.24,7,5),new THREE.MeshStandardMaterial({color:0xffedb0,emissive:0xffb94a,emissiveIntensity:.55}));lamp.position.set(sx,3.8,z);scene.add(lamp);
