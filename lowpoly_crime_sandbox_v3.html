@@ -330,7 +330,7 @@ function buildCity(){
 }
 function buildPlayer(){
  player=new THREE.Group();const source=templateFor("personA",0);
- playerVisual=normaliseModel(source,2.05,1.25,1.25,!!templates.personA);player.add(playerVisual);
+ playerVisual=normaliseModel(source,2.05,1.25,1.25,true);player.add(playerVisual);
  player.position.set(-2.3,0,9);player.rotation.y=0;scene.add(player);
 }
 function makeLabelSprite(text){
@@ -354,12 +354,12 @@ function buildParkedCars(){
   {x:4.5,z:8,id:"carSport"},{x:-4.5,z:20,id:"carSedan"},{x:4.5,z:-16,id:"carSUV"},
   {x:-4.5,z:-52,id:"carTaxi"},{x:4.5,z:58,id:"carSport"},{x:-4.5,z:92,id:"carSedan"}
  ];
- positions.forEach((p,i)=>{const car=new THREE.Group();const model=normaliseModel(templateFor(p.id,i),1.85,2.25,4.5,!!templates[p.id]);car.add(model);car.position.set(p.x,0,p.z);car.rotation.y=(i%2?Math.PI:0);car.userData={driveable:true,sourceId:p.id,parked:true};scene.add(car);driveable.push(car);});
+ positions.forEach((p,i)=>{const car=new THREE.Group();const model=normaliseModel(templateFor(p.id,i),1.85,2.25,4.5,true);car.add(model);car.position.set(p.x,0,p.z);car.rotation.y=(i%2?Math.PI:0);car.userData={driveable:true,sourceId:p.id,parked:true};scene.add(car);driveable.push(car);});
 }
 function buildTraffic(){
  const ids=["carTaxi","carSedan","carSport","carSUV","carSedan","carTaxi","carSUV","carSport"];
  ids.forEach((id,i)=>{
-  const car=new THREE.Group();car.add(normaliseModel(templateFor(id,i),1.8,2.25,4.5,!!templates[id]));
+  const car=new THREE.Group();car.add(normaliseModel(templateFor(id,i),1.8,2.25,4.5,true));
   const dir=i%2===0?1:-1;const roadZ=[-80,-40,40,80][i%4];const laneZ=roadZ+(dir>0?-2.4:2.4);
   car.position.set(-135+(i*37)%260,0,laneZ);car.rotation.y=dir>0?-Math.PI/2:Math.PI/2;
   car.userData={speed:4.2+(i%3)*1.1,dir,roadZ,baseY:0};scene.add(car);traffic.push(car);
@@ -369,7 +369,7 @@ function buildPedestrians(){
  const ids=["personA","personB","personA","personB","personA","personB","personA","personB"];
  const spots=[[-8,-18],[8,-56],[-8,28],[8,52],[-48,8],[48,-8],[-88,10],[88,-6]];
  ids.forEach((id,i)=>{
-  const g=new THREE.Group();g.add(normaliseModel(templateFor(id,i),1.9,1.2,1.2,!!templates[id]));g.position.set(spots[i][0],0,spots[i][1]);g.userData={baseX:spots[i][0],baseZ:spots[i][1],phase:i*1.4,step:.35+(i%3)*.12};scene.add(g);npcs.push(g);
+  const g=new THREE.Group();g.add(normaliseModel(templateFor(id,i),1.9,1.2,1.2,true));g.position.set(spots[i][0],0,spots[i][1]);g.userData={baseX:spots[i][0],baseZ:spots[i][1],phase:i*1.4,step:.35+(i%3)*.12};scene.add(g);npcs.push(g);
  });
 }
 function buildCollectibles(){
