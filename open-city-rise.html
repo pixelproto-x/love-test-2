@@ -209,10 +209,11 @@ const unitBoxGeometry=new THREE.BoxGeometry(1,1,1);function box(parent,w,h,d,mat
 const labelMaterialCache=new Map(),labelGeometry=new THREE.PlaneGeometry(7.3,1.82);function makeLabel(text,bg,fg='#fff'){const key=`${text}|${bg}|${fg}`;let m=labelMaterialCache.get(key);if(!m){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle=fg;ctx.font='900 56px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,256,65,490);ctx.strokeStyle='#ffffff66';ctx.lineWidth=7;ctx.strokeRect(4,4,504,120);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;m=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});labelMaterialCache.set(key,m);}return new THREE.Mesh(labelGeometry,m);}
 const facadeWindowMaterial=mat(0x4e7b8b,.36,{metalness:.1,emissive:0x122b35}),windowTrimMaterial=mat(0xddddcf);
 const buildingColorMaterials=new Map(),awningMaterialCache=new Map();
+const serviceSignTypes=new Set(['HOSPITAL','BANK','WEAPON SHOP','24/7','CAFE']);
 function makeBuilding(x,z,w,d,h,type='OFFICE'){
  const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const color=type==='HOSPITAL'?0xe7e9e4:type==='BANK'?0xa9b9bf:type==='WEAPON SHOP'?0x7b817e:type==='24/7'?0xc5bca0:[0x9c9da0,0xb7a38b,0x8e9da2,0xc6bdb1,0x778e91][Math.floor(Math.random()*5)];
  if(!buildingColorMaterials.has(color))buildingColorMaterials.set(color,mat(color));const body=box(g,w,h,d,buildingColorMaterials.get(color),0,h/2,0);const roof=box(g,w+.35,.45,d+.35,mat(0x444e58),0,h+.2,0);
- const front=makeLabel(type,type==='HOSPITAL'?'#d8e7e5':type==='BANK'?'#2b4f68':type==='WEAPON SHOP'?'#4d3431':type==='24/7'?'#176b5a':'#34434c',type==='HOSPITAL'?'#d52f3e':'#fff');front.position.set(0,Math.min(h-.7,3.8),d/2+.025);g.add(front);
+ if(serviceSignTypes.has(type)){const front=makeLabel(type,type==='HOSPITAL'?'#d8e7e5':type==='BANK'?'#2b4f68':type==='WEAPON SHOP'?'#4d3431':type==='24/7'?'#176b5a':'#34434c',type==='HOSPITAL'?'#d52f3e':'#fff');front.position.set(0,Math.min(h-.7,3.8),d/2+.025);g.add(front);}
  const winMat=facadeWindowMaterial;
  const cols=Math.max(1,Math.min(lowPowerMode?1:3,Math.floor(w/(lowPowerMode?10:5.2)))),rows=Math.min(lowPowerMode?1:3,Math.floor((h-2.4)/(lowPowerMode?5.5:3.8)));
  for(let ix=0;ix<cols;ix++)for(let iy=0;iy<rows;iy++){
@@ -220,22 +221,40 @@ function makeBuilding(x,z,w,d,h,type='OFFICE'){
   box(g,Math.min(1.45,w/cols*.68),1.05,.055,winMat,wx,wy,d/2+.012,false);
   if(!lowPowerMode&&ix%2===0&&w>10)box(g,.055,1.22,.08,windowTrimMaterial,wx,wy,d/2+.045,false);
  }
- const awningColor=type==='24/7'?0x2b9c78:type==='WEAPON SHOP'?0x8c453b:0x697985;if(!awningMaterialCache.has(awningColor))awningMaterialCache.set(awningColor,mat(awningColor));const awning=box(g,w*.64,.24,.85,awningMaterialCache.get(awningColor),0,2.9,d/2+.4,false);
+ if(serviceSignTypes.has(type)){const awningColor=type==='24/7'?0x2b9c78:type==='WEAPON SHOP'?0x8c453b:type==='CAFE'?0x697985:type==='HOSPITAL'?0xd6dadd:0x697985;if(!awningMaterialCache.has(awningColor))awningMaterialCache.set(awningColor,mat(awningColor));box(g,w*.64,.24,.85,awningMaterialCache.get(awningColor),0,2.9,d/2+.4,false);}
  const building={x,z,w,d,h,box:g,type};city.buildings.push(building);const cellKey=`${Math.floor(x/GRID_STEP)},${Math.floor(z/GRID_STEP)}`;if(!city.buildingBuckets.has(cellKey))city.buildingBuckets.set(cellKey,[]);city.buildingBuckets.get(cellKey).push(building);
  if(type==='24/7'||type==='BANK'||type==='HOSPITAL'||type==='WEAPON SHOP')city.shops.push({x,z,w,d,h,type,group:g});
  return g;
 }
 // Roads, sidewalks and lane markings.
 const extent=city.half-12;
+// Batch static road surfaces and markings into three GPU draw calls instead of
+// hundreds of independent meshes. All transforms are frozen after creation.
+const roadParts=[],sidewalkParts=[],laneParts=[];
+const addStaticPart=(list,w,h,d,x,y,z)=>list.push({w,h,d,x,y,z});
+function addStaticBatch(material,parts,receiveShadow=false){
+ if(!parts.length)return null;
+ const mesh=new THREE.InstancedMesh(unitBoxGeometry,material,parts.length),dummy=new THREE.Object3D();
+ for(let i=0;i<parts.length;i++){const v=parts[i];dummy.position.set(v.x,v.y,v.z);dummy.rotation.set(0,0,0);dummy.scale.set(v.w,v.h,v.d);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}
+ mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);mesh.castShadow=false;mesh.receiveShadow=receiveShadow;mesh.computeBoundingSphere();scene.add(mesh);return mesh;
+}
 for(let k=-GRID_RADIUS;k<=GRID_RADIUS;k++){
  const p=k*GRID_STEP;
- const v=box(scene,10,.08,extent*2,M.road,p,-.08,0,false);
- const h=box(scene,extent*2,.08,10,M.road,0,-.08,p,false);
- for(const off of [-6.2,6.2]){box(scene,2.2,.13,extent*2,M.side,p+off,-.02,0,false);box(scene,extent*2,.13,2.2,M.side,0,-.02,p+off,false);}
+ addStaticPart(roadParts,10,.08,extent*2,p,-.08,0);
+ addStaticPart(roadParts,extent*2,.08,10,0,-.08,p);
+ for(const off of [-6.2,6.2]){
+  addStaticPart(sidewalkParts,2.2,.13,extent*2,p+off,-.02,0);
+  addStaticPart(sidewalkParts,extent*2,.13,2.2,0,-.02,p+off);
+ }
  for(let q=-GRID_RADIUS;q<=GRID_RADIUS;q+=(lowPowerMode?4:2)){
-   const a=q*GRID_STEP;box(scene,4,.025,.18,M.line,p,-.025,a,false);box(scene,.18,.025,4,M.line,a,-.025,p,false);
+  const a=q*GRID_STEP;
+  addStaticPart(laneParts,4,.025,.18,p,-.025,a);
+  addStaticPart(laneParts,.18,.025,4,a,-.025,p);
  }
 }
+addStaticBatch(M.road,roadParts);
+addStaticBatch(M.side,sidewalkParts,true);
+addStaticBatch(M.line,laneParts);
 // Shared tree-crown geometry also reduces GPU-resource duplication across the city.
 const treeCrownGeometry=new THREE.IcosahedronGeometry(2.6,0);
 // Low-poly blocks and guaranteed service locations.
@@ -252,11 +271,24 @@ for(let ix=-GRID_RADIUS;ix<GRID_RADIUS;ix++)for(let iz=-GRID_RADIUS;iz<GRID_RADI
  // Small park/tree in occasional blocks.
  if(Math.random()<(lowPowerMode?.07:.14)){const tx=cx+(Math.random()-.5)*15,tz=cz+(Math.random()-.5)*15;const trunk=mat(0x78543a),leaf=mat(0x3e8555);box(scene,.8,3,.8,trunk,tx,1.5,tz);const crown=new THREE.Mesh(treeCrownGeometry,leaf);crown.position.set(tx,4,tz);crown.castShadow=true;scene.add(crown);}
 }
-// Shared street-lamp geometry/material keeps the large map from allocating identical GPU resources per lamp.
-const lampGlowGeometry=new THREE.BoxGeometry(.55,.22,.38),lampGlowMaterial=new THREE.MeshBasicMaterial({color:0xffedb1});
-// Street lamps at intersections.
-function makeLamp(x,z){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const metal=mat(0x414b52,.6,{metalness:.35});box(g,.18,4.5,.18,metal,0,2.25,0);box(g,1.4,.14,.14,metal,.58,4.35,0);const glow=new THREE.Mesh(lampGlowGeometry,lampGlowMaterial);glow.position.set(1.12,4.22,0);g.add(glow);city.lamps.push(g);}
+// Batch every street light into three instanced meshes (pole, arm, glow),
+// so a large city needs three lamp draw calls rather than three per light.
+const lampGlowGeometry=new THREE.BoxGeometry(.55,.22,.38),lampGlowMaterial=new THREE.MeshBasicMaterial({color:0xffedb1}),lampMetalMaterial=mat(0x414b52,.6,{metalness:.35});
+function makeLamp(x,z){city.lamps.push({x,z,visible:undefined});}
 for(let x=-GRID_RADIUS;x<=GRID_RADIUS;x++)for(let z=-GRID_RADIUS;z<=GRID_RADIUS;z++)if((x+z)%(lowPowerMode?5:2)===0)makeLamp(x*GRID_STEP+7,z*GRID_STEP+7);
+const lampPoleInstances=new THREE.InstancedMesh(unitBoxGeometry,lampMetalMaterial,city.lamps.length);
+const lampArmInstances=new THREE.InstancedMesh(unitBoxGeometry,lampMetalMaterial,city.lamps.length);
+const lampGlowInstances=new THREE.InstancedMesh(lampGlowGeometry,lampGlowMaterial,city.lamps.length);
+for(const mesh of [lampPoleInstances,lampArmInstances,lampGlowInstances]){mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);mesh.castShadow=false;mesh.receiveShadow=false;scene.add(mesh);}
+const lampDummy=new THREE.Object3D();
+function setLampVisible(index,visible){
+ const lamp=city.lamps[index];if(lamp.visible===visible)return;lamp.visible=visible;
+ lampDummy.position.set(lamp.x,2.25,lamp.z);lampDummy.rotation.set(0,0,0);lampDummy.scale.set(visible ? 0.18 : 0,visible ? 4.5 : 0,visible ? 0.18 : 0);lampDummy.updateMatrix();lampPoleInstances.setMatrixAt(index,lampDummy.matrix);
+ lampDummy.position.set(lamp.x+.58,4.35,lamp.z);lampDummy.scale.set(visible ? 1.4 : 0,visible ? 0.14 : 0,visible ? 0.14 : 0);lampDummy.updateMatrix();lampArmInstances.setMatrixAt(index,lampDummy.matrix);
+ lampDummy.position.set(lamp.x+1.12,4.22,lamp.z);lampDummy.scale.setScalar(visible ? 1 : 0);lampDummy.updateMatrix();lampGlowInstances.setMatrixAt(index,lampDummy.matrix);
+ lampPoleInstances.instanceMatrix.needsUpdate=true;lampArmInstances.instanceMatrix.needsUpdate=true;lampGlowInstances.instanceMatrix.needsUpdate=true;
+}
+for(let i=0;i<city.lamps.length;i++)setLampVisible(i,false);
 // Rounded humanoid rig: capsules, joints, facial silhouette and independently animated limbs.
 const humanGeo={
  torso:new THREE.CapsuleGeometry(.31,.53,4,10),
@@ -464,7 +496,7 @@ function updateEffects(dt){for(let i=city.particles.length-1;i>=0;i--){const p=c
  for(let i=city.tracers.length-1;i>=0;i--){const t=city.tracers[i];t.life-=dt;if(t.life<=0){scene.remove(t.mesh);t.mesh.geometry?.dispose();if(t.mesh.material){if(Array.isArray(t.mesh.material))t.mesh.material.forEach(m=>m.dispose());else t.mesh.material.dispose();}city.tracers.splice(i,1);}}
  for(let i=city.stains.length-1;i>=0;i--){const s=city.stains[i];s.life-=dt;s.mesh.material.opacity=Math.min(.43,s.life/32*.43);if(s.life<=0){scene.remove(s.mesh);s.mesh.geometry.dispose();s.mesh.material.dispose();city.stains.splice(i,1);}}
 }
-function updateWorldVisibility(){const pp=player.inCar?player.inCar.position:player.group.position;const lampRangeSq=visibleRangeSq*.82,npcRangeSq=visibleRangeSq*.72,carRangeSq=visibleRangeSq*1.55;for(const b of city.buildings){const dx=b.x-pp.x,dz=b.z-pp.z;b.box.visible=dx*dx+dz*dz<visibleRangeSq;}for(const lamp of city.lamps){const dx=lamp.position.x-pp.x,dz=lamp.position.z-pp.z;lamp.visible=dx*dx+dz*dz<lampRangeSq;}for(const n of city.npcs){const dx=n.position.x-pp.x,dz=n.position.z-pp.z;n.visible=n.userData.dead||dx*dx+dz*dz<npcRangeSq;}for(const c of city.cars){const dx=c.position.x-pp.x,dz=c.position.z-pp.z;c.visible=c===player.inCar||dx*dx+dz*dz<carRangeSq;}}
+function updateWorldVisibility(){const pp=player.inCar?player.inCar.position:player.group.position;const lampRangeSq=visibleRangeSq*.82,npcRangeSq=visibleRangeSq*.72,carRangeSq=visibleRangeSq*1.55;for(const b of city.buildings){const dx=b.x-pp.x,dz=b.z-pp.z;b.box.visible=dx*dx+dz*dz<visibleRangeSq;}for(let i=0;i<city.lamps.length;i++){const lamp=city.lamps[i],dx=lamp.x-pp.x,dz=lamp.z-pp.z;setLampVisible(i,dx*dx+dz*dz<lampRangeSq);}for(const n of city.npcs){const dx=n.position.x-pp.x,dz=n.position.z-pp.z;n.visible=n.userData.dead||dx*dx+dz*dz<npcRangeSq;}for(const c of city.cars){const dx=c.position.x-pp.x,dz=c.position.z-pp.z;c.visible=c===player.inCar||dx*dx+dz*dz<carRangeSq;}}
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(.04,(now-lastFrame)/1000||.016);lastFrame=now;const time=now/1000;
  if(lookInput.x||lookInput.y){player.yaw-=lookInput.x*dt*2.4;cameraPitch=THREE.MathUtils.clamp(cameraPitch+lookInput.y*dt*.9,.12,.72);}
  updatePlayer(dt);updateCars(dt,time);updateNPCs(dt);updateEffects(dt);
