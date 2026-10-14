@@ -93,6 +93,12 @@ jobs:
 
             const joyDisplay = await page.locator('#joystick').evaluate(el => getComputedStyle(el).display);
             if (mobile || landscape) assert.notEqual(joyDisplay, 'none', label + ': touch joystick is hidden');
+            if (mobile && !landscape) {
+              const joyBox = await page.locator('#joystick').boundingBox();
+              const hintBox = await page.locator('.bottom-guide').boundingBox();
+              const overlaps = joyBox.x < hintBox.x + hintBox.width && joyBox.x + joyBox.width > hintBox.x && joyBox.y < hintBox.y + hintBox.height && joyBox.y + joyBox.height > hintBox.y;
+              assert.equal(overlaps, false, 'mobile hint overlaps the joystick');
+            }
             const objectiveBox = await page.locator('.objective').boundingBox();
             assert.ok(objectiveBox.x >= 0 && objectiveBox.x + objectiveBox.width <= viewport.width + 1, label + ': objective panel spills off screen');
             const actionBox = await page.locator('.actions').boundingBox();
