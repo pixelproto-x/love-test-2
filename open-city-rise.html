@@ -479,7 +479,7 @@ window.__OPEN_CITY_DEBUG={version:'open-city-rise-perf-1',getStats:()=>({buildin
 updateHUD();updateWorldVisibility();drawMiniMap();setStatus('城市已就緒：256 個街區、17 條縱橫主幹道。已啟用距離剔除與自動畫質調整。');
 addEventListener('resize',()=>{document.body.classList.toggle('touch-device',matchMedia('(pointer: coarse)').matches||innerWidth<760);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(currentRenderRatio);drawMiniMap();});
 addEventListener('orientationchange',()=>setTimeout(()=>{document.body.classList.toggle('touch-device',matchMedia('(pointer: coarse)').matches||innerWidth<760);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);drawMiniMap();},160));
-$('startBtn').onclick=()=>{$('startCover').style.display='none';actionDown();toast('歡迎來到 OPEN CITY: RISE！256 個街區等你探索。');if(!isTouchDevice())renderer.domElement.requestPointerLock?.();else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});drawMiniMap();};
+$('startBtn').onclick=()=>{$('startCover').style.display='none';actionDown();toast(isTouchDevice()?'歡迎來到 OPEN CITY: RISE！256 個街區等你探索。':'城市已就緒：WASD 移動；點擊遊戲場景才會鎖定滑鼠視角，按 Esc 釋放。');if(isTouchDevice()&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});drawMiniMap();};
 gameInitialized=true; $('startBtn').textContent='進入城市 ▶'; $('bootError').style.display='none';
 // Keep desktop interaction usable when the trainer is open and restore game focus when closed.
 $('trainerToggle').addEventListener('click',e=>e.stopPropagation());
