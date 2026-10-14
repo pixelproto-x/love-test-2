@@ -58,6 +58,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
  #mapCanvas{max-height:62dvh}
 }
 @media(min-width:641px){.joystick{display:none}.bottom-guide{display:block}}
+@media(orientation:landscape) and (max-height:520px){.joystick{display:block!important}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <script type="importmap">
@@ -270,7 +271,7 @@ function createWorld(){
  buildTraffic();
  buildPedestrians();
  buildCollectibles();
- clock=new THREE.Clock();
+ clock=new THREE.Clock();window.__CITYLIFE_READY=true;
 }
 function buildRoads(){
  const roadMat=sharedMat(0x3c4651),sideMat=sharedMat(0xc7c9bb),lineMat=sharedMat(0xf3dda0),whiteMat=sharedMat(0xecefe7);
@@ -565,7 +566,7 @@ function setupControls(){
 function openMap(){drawMap();showScreen("mapScreen");}
 async function init(){
  loader=new GLTFLoader();
- const loaded=await loadAssets();
+ const loaded=await loadAssets();window.__CITYLIFE_ASSET_STATUS={good:loaded.good,total:loaded.total};
  status("組裝城市道路與角色…",90);
  createWorld();setupControls();isReady=true;
  status("城市準備完成",100);$("loader").classList.add("hidden");showScreen("startScreen");
