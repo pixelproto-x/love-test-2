@@ -1,0 +1,55 @@
+{
+  "name": "open-city-rise-desktop",
+  "productName": "Open City Rise",
+  "version": "0.1.0",
+  "description": "Open City Rise standalone Windows 3D city game",
+  "private": true,
+  "author": "Open City Rise",
+  "license": "UNLICENSED",
+  "main": "desktop-app/main.cjs",
+  "scripts": {
+    "prepare:desktop": "node desktop-app/prepare-assets.cjs",
+    "start": "npm run prepare:desktop && electron .",
+    "test:app": "npm run prepare:desktop && node desktop-app/smoke-test.cjs",
+    "build:win": "npm run prepare:desktop && electron-builder --win nsis portable --x64"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3",
+    "three": "0.160.0"
+  },
+  "build": {
+    "appId": "com.opencityrise.desktop",
+    "productName": "Open City Rise",
+    "artifactName": "${productName}-${version}-${arch}-${target}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop-app/main.cjs",
+      "desktop-app/preload.cjs",
+      "open-city-rise.html",
+      "vendor/three.min.js",
+      "package.json"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "verifyUpdateCodeSignature": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Open City Rise"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${arch}-portable.${ext}"
+    }
+  }
+}

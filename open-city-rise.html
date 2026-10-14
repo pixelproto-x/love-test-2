@@ -153,6 +153,7 @@ function loadThree(){
   $('startBtn').textContent='載入 3D 引擎…';
   ui.status.textContent='正在載入 3D 引擎，首次開啟需要網路連線…';
   const sources=[
+    ...(window.openCityDesktop?.isDesktop ? ['./vendor/three.min.js'] : []),
     'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js',
     'https://unpkg.com/three@0.160.0/build/three.min.js'
@@ -191,7 +192,8 @@ function bootGame(){
  try{
   if(!window.THREE) throw new Error('Three.js 尚未載入，請檢查網路連線。');
   const THREE=window.THREE;
-  const lowPowerMode=matchMedia('(pointer: coarse)').matches || innerWidth<820 || (navigator.hardwareConcurrency>0 && navigator.hardwareConcurrency<=4) || (navigator.deviceMemory>0 && navigator.deviceMemory<=8);
+  const desktopApp=!!window.openCityDesktop?.isDesktop;
+  const lowPowerMode=matchMedia('(pointer: coarse)').matches || innerWidth<820 || (!desktopApp && ((navigator.hardwareConcurrency>0 && navigator.hardwareConcurrency<=4) || (navigator.deviceMemory>0 && navigator.deviceMemory<=8)));
   document.body.classList.toggle('touch-device', touchPointer());
   const scene=new THREE.Scene();scene.background=new THREE.Color(0x9ad0e7);scene.fog=new THREE.Fog(0x9ad0e7,lowPowerMode?115:170,lowPowerMode?390:650);
 const camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.1,lowPowerMode?760:1150);

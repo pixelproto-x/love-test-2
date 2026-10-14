@@ -1,0 +1,49 @@
+name: Open City Rise Windows App Build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'open-city-rise.html'
+      - 'package.json'
+      - 'desktop-app/**'
+      - '.github/workflows/open-city-rise-desktop-build.yml'
+permissions:
+  contents: read
+concurrency:
+  group: open-city-rise-windows-build
+  cancel-in-progress: true
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install pinned build dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run app packaging checks
+        run: npm run test:app
+      - name: Build installer and portable app
+        run: npm run build:win
+      - name: Verify output executables
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path release -Filter *.exe
+          if ($files.Count -lt 2) {
+            Get-ChildItem -Path release -Force
+            throw "Expected both the installer and portable Windows executable."
+          }
+          $files | ForEach-Object {
+            if ($_.Length -lt 50000000) { throw "Executable unexpectedly small: $($_.Name) ($($_.Length) bytes)" }
+            Write-Host ("Verified: {0} ({1:N0} bytes)" -f $_.Name, $_.Length)
+          }
+      - name: Upload Windows app executables
+        uses: actions/upload-artifact@v4
+        with:
+          name: Open-City-Rise-Windows-x64
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 30
