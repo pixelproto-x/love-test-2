@@ -142,7 +142,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const $ = id => document.getElementById(id);
-const ASSET = "https://hidencod.github.io/tge-assets/";
+const ASSET = "https://raw.githubusercontent.com/Hidencod/tge-assets/main/";
 const ASSETS = {
  buildingA:"packs/city-kit-commercial/building-a.glb",
  buildingB:"packs/city-kit-commercial/building-b.glb",
@@ -215,14 +215,14 @@ function fallbackTree(index=0){
 }
 
 function normaliseModel(source,targetHeight,maxWidth,maxDepth,frontCorrection=false){
- const obj=source.clone(true);obj.scale.set(1,1,1);if(frontCorrection)obj.rotation.y=Math.PI;
+ const wrapper=new THREE.Group();const obj=source.clone(true);obj.scale.set(1,1,1);if(frontCorrection)obj.rotation.y=Math.PI;
  let bounds=new THREE.Box3().setFromObject(obj);let size=bounds.getSize(new THREE.Vector3());
- if(!Number.isFinite(size.y)||size.y<.01)return obj;
+ if(!Number.isFinite(size.y)||size.y<.01){wrapper.add(obj);return wrapper;}
  let scale=targetHeight/size.y;if(maxWidth)scale=Math.min(scale,maxWidth/Math.max(.01,size.x));if(maxDepth)scale=Math.min(scale,maxDepth/Math.max(.01,size.z));
  obj.scale.setScalar(scale);bounds.setFromObject(obj);const center=bounds.getCenter(new THREE.Vector3());
  obj.position.x-=center.x;obj.position.z-=center.z;obj.position.y-=bounds.min.y;
  obj.traverse(o=>{if(o.isMesh){o.castShadow=renderer.shadowMap.enabled;o.receiveShadow=renderer.shadowMap.enabled;if(o.material&&o.material.map)o.material.map.colorSpace=THREE.SRGBColorSpace;}});
- return obj;
+ wrapper.add(obj);return wrapper;
 }
 function templateFor(id,index=0){
  if(templates[id])return templates[id];
