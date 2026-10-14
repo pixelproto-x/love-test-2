@@ -1,6 +1,6 @@
-# Open City Rise — Windows App
+# Open City Rise Explorer — Windows App
 
-This folder contains the Electron host for the standalone Windows application.
+This is the standalone Windows build of the non-combat city exploration edition.
 
 ## Build locally
 
@@ -13,10 +13,10 @@ npm run start
 npm run build:win
 ```
 
-The Windows build creates two executables in `release\`:
-- `Open City Rise-0.1.0-x64-nsis.exe`: installer with Start Menu and Desktop shortcuts.
-- `Open City Rise-0.1.0-x64-portable.exe`: portable executable that does not require installation.
+The Windows build creates two executables in `release\\`:
+- `Open City Rise Explorer-0.1.0-x64-nsis.exe`: installer with Start Menu and Desktop shortcuts.
+- `Open City Rise Explorer-0.1.0-x64-portable.exe`: portable executable that does not require installation.
 
-The build bundles Three.js locally so the 3D engine does not need a CDN connection at launch. Browser-based GitHub Pages play still uses the existing CDN fallbacks. Electron keeps Node integration disabled and uses a sandboxed, context-isolated preload bridge.
+The desktop app loads `open-city-rise-safe.html`, which keeps the city, vehicles, NPC roaming, timed delivery missions, police pursuit challenge, minimap, desktop controls and touch controls. Weapon models, attacks, combat NPC spawners, injury effects and crime robbery interactions are removed. Three.js is bundled locally so the 3D engine does not need a CDN connection at launch. Electron keeps Node integration disabled and uses a sandboxed, context-isolated preload bridge.
 
 Desktop mode enables the higher-detail scene profile for a regular PC window; adaptive rendering remains enabled to avoid forcing maximum resolution when the GPU is under load. Press F11 for fullscreen.
