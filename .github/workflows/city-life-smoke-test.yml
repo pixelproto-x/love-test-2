@@ -34,7 +34,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.GAME_URL;
-          const expectedVersion = 'citylife-2026-10-14-c';
+          const expectedVersion = 'citylife-2026-10-14-d';
           const browserErrors = [];
           const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
 
@@ -83,6 +83,8 @@ jobs:
               const hud = document.getElementById('hud');
               return hud && !hud.classList.contains('hidden');
             });
+            await page.waitForTimeout(450);
+            await page.screenshot({ path: 'artifacts/' + label + '-scene.png' });
             assert.ok(await page.locator('#objectiveTitle').innerText(), label + ': mission title missing');
             assert.ok(await page.locator('#objectiveDistance').innerText(), label + ': objective distance missing');
 
