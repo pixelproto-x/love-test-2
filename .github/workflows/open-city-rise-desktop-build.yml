@@ -1,9 +1,10 @@
-name: Open City Rise Windows App Build
+name: Open City Rise Explorer Windows App Build
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - 'open-city-rise-safe.html'
       - 'open-city-rise.html'
       - 'package.json'
       - 'desktop-app/**'
@@ -43,7 +44,7 @@ jobs:
       - name: Upload Windows app executables
         uses: actions/upload-artifact@v4
         with:
-          name: Open-City-Rise-Windows-x64
+          name: Open-City-Rise-Explorer-Windows-x64
           path: release/*.exe
           if-no-files-found: error
           retention-days: 30
