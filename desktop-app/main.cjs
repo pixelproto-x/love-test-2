@@ -17,7 +17,7 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0b1521',
-    title: 'Open City Rise',
+    title: 'Open City Rise Explorer',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -57,7 +57,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(app.getAppPath(), 'open-city-rise.html')).catch(() => {
+  mainWindow.loadFile(path.join(app.getAppPath(), 'open-city-rise-safe.html')).catch(() => {
     mainWindow?.show();
     mainWindow?.webContents.openDevTools({ mode: 'detach' });
   });
