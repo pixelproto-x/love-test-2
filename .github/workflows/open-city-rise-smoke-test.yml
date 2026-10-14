@@ -64,7 +64,7 @@ jobs:
             assert.ok(stats.buildings >= 245, label + ': city generation incomplete: ' + stats.buildings);
             assert.ok(stats.npcs >= 15 && stats.npcs <= 100, label + ': unexpected NPC count ' + stats.npcs);
             assert.ok(stats.cars >= 8 && stats.cars <= 35, label + ': unexpected traffic count ' + stats.cars);
-            assert.ok(stats.drawCalls > 0 && stats.drawCalls < 2500, label + ': draw calls out of expected range ' + stats.drawCalls);
+            assert.ok(stats.drawCalls > 0 && stats.drawCalls < 350, label + ': draw calls exceed optimized target ' + stats.drawCalls);
             await page.screenshot({ path: 'artifacts/' + label + '-start.png' });
             await page.locator('#startBtn').click();
             await page.waitForFunction(() => getComputedStyle(document.querySelector('#startCover')).display === 'none');
