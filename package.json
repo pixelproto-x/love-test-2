@@ -1,8 +1,8 @@
 {
   "name": "open-city-rise-desktop",
-  "productName": "Open City Rise",
+  "productName": "Open City Rise Explorer",
   "version": "0.1.0",
-  "description": "Open City Rise standalone Windows 3D city game",
+  "description": "Open City Rise standalone Windows 3D city exploration game",
   "private": true,
   "author": "Open City Rise",
   "license": "UNLICENSED",
@@ -19,15 +19,15 @@
     "three": "0.160.0"
   },
   "build": {
-    "appId": "com.opencityrise.desktop",
-    "productName": "Open City Rise",
+    "appId": "com.opencityrise.explorer",
+    "productName": "Open City Rise Explorer",
     "directories": {
       "output": "release"
     },
     "files": [
       "desktop-app/main.cjs",
       "desktop-app/preload.cjs",
-      "open-city-rise.html",
+      "open-city-rise-safe.html",
       "vendor/three.min.js",
       "package.json"
     ],
