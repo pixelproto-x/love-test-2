@@ -34,6 +34,7 @@ jobs:
           import { chromium } from 'playwright';
 
           const base = process.env.GAME_URL;
+          const expectedVersion = 'citylife-2026-10-14-c';
           const browserErrors = [];
           const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
 
@@ -52,9 +53,9 @@ jobs:
               } catch (e) {
                 lastError = String(e);
               }
-              const freshGame = await page.evaluate(() => window.__CITYLIFE_READY === true && !!window.__CITYLIFE_ASSET_STATUS).catch(() => false);
+              const freshGame = await page.evaluate(v => window.__CITYLIFE_VERSION === v && window.__CITYLIFE_READY === true && !!window.__CITYLIFE_ASSET_STATUS, expectedVersion).catch(() => false);
               if (freshGame && await page.locator('#startBtn').isVisible().catch(() => false)) return;
-              lastError = await page.evaluate(() => 'title=' + document.title + '; ready=' + String(window.__CITYLIFE_READY) + '; assets=' + String(!!window.__CITYLIFE_ASSET_STATUS)).catch(() => 'Game page did not become ready');
+              lastError = await page.evaluate(() => 'title=' + document.title + '; version=' + String(window.__CITYLIFE_VERSION) + '; ready=' + String(window.__CITYLIFE_READY) + '; assets=' + String(!!window.__CITYLIFE_ASSET_STATUS)).catch(() => 'Game page did not become ready');
               await page.waitForTimeout(6000);
             }
             throw new Error(label + ' failed to show the game start screen: ' + lastError);
@@ -112,6 +113,8 @@ jobs:
               }
               await page.keyboard.up('ArrowUp');
               await page.keyboard.up('Shift');
+              await page.screenshot({ path: 'artifacts/' + label + '-movement-debug.png' });
+              console.log(label + ' keyboard distance trace: ' + before + ' -> ' + distanceTrace.join(','));
               assert.ok(Number.isFinite(before) && Number.isFinite(after) && after < before, 'keyboard movement did not reduce objective distance: ' + before + ' -> ' + after + '; trace=' + distanceTrace.join(','));
               await page.waitForFunction(() => document.getElementById('interactLabel')?.innerText === '完成任務', null, { timeout: 3000 });
               await page.locator('#interactBtn').click();
