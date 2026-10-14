@@ -143,7 +143,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const $ = id => document.getElementById(id);
-window.__CITYLIFE_VERSION="citylife-2026-10-14-c";
+window.__CITYLIFE_VERSION="citylife-2026-10-14-d";
 const ASSET = "https://raw.githubusercontent.com/Hidencod/tge-assets/main/";
 const ASSETS = {
  buildingA:"packs/city-kit-commercial/building-a.glb",
@@ -168,8 +168,8 @@ let yaw=0,pitch=.24,drag=null,keys={},joy={x:0,y:0},runTouch=false,velocityY=0,o
 let lastHud=0,lastMap=0,toastTimer=0,movePhase=0,frameCount=0;
 const missions=[
  {title:"找到街角補給站",sub:"沿著金色箭頭走到光柱，再按「互動」",pos:[0,-12],reward:180},
- {title:"把包裹送到便利店",sub:"繼續跟著箭頭，抵達下一個金色標記",pos:[33,-40],reward:320},
- {title:"抵達海景廣場",sub:"穿過街區到達最後一個任務點",pos:[-40,40],reward:500}
+ {title:"把包裹送到便利店",sub:"沿著同一條路前進，到下一個金色標記",pos:[0,-34],reward:320},
+ {title:"抵達中央十字路口",sub:"沿著道路往右轉，前往最後一個金色標記",pos:[24,-40],reward:500}
 ];
 const worldLimit=137;
 
@@ -346,7 +346,7 @@ function buildCity(){
 function buildPlayer(){
  player=new THREE.Group();const source=templateFor("personA",0);
  playerVisual=normaliseModel(source,2.05,1.25,1.25,true);player.add(playerVisual);
- player.position.set(-2.3,0,9);player.rotation.y=0;scene.add(player);
+ player.position.set(0,0,0);player.rotation.y=0;scene.add(player);
 }
 function makeLabelSprite(text){
  const c=document.createElement("canvas");c.width=320;c.height=84;const ctx=c.getContext("2d");
@@ -354,7 +354,7 @@ function makeLabelSprite(text){
  ctx.strokeStyle="#ffd166";ctx.lineWidth=5;ctx.stroke();
  ctx.fillStyle="#fff3c6";ctx.font="bold 32px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(text,160,43);
  const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;
- const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));sp.scale.set(5.1,1.34,1);sp.position.y=7.3;return sp;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));sp.scale.set(4.4,1.16,1);sp.position.y=4.0;return sp;
 }
 function buildMissionMarker(){
  marker=new THREE.Group();
