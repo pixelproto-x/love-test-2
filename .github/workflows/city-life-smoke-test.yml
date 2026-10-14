@@ -29,10 +29,9 @@ jobs:
           GAME_URL: https://pixelproto-x.github.io/love-test-2/lowpoly_crime_sandbox.html
         run: |
           mkdir -p artifacts
-          node <<'NODE'
-          const assert = require('node:assert/strict');
-          const fs = require('node:fs');
-          const { chromium } = require('playwright');
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { chromium } from 'playwright';
 
           const base = process.env.GAME_URL;
           const browserErrors = [];
