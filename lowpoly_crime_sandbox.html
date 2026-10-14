@@ -31,8 +31,9 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .obj-kicker{font-size:9px;letter-spacing:1.5px;color:var(--gold);font-weight:950}.obj-title{font-size:14px;font-weight:900;margin:2px 0}.obj-sub{font-size:10px;color:#c7d5e2;line-height:1.4}.distance{font-variant-numeric:tabular-nums;font-weight:950;font-size:13px;white-space:nowrap;text-align:right;color:var(--green)}.distance small{display:block;font-size:9px;color:#b6c6d6;font-weight:700}
 .interaction-tip{position:absolute;left:50%;top:168px;transform:translateX(-50%);padding:8px 12px;border:1px solid #ffd16675;color:#fff1c7;background:#162537e8;border-radius:12px;font-size:11px;white-space:nowrap;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis}
 .bottom-guide{position:absolute;left:12px;bottom:16px;padding:9px 12px;max-width:220px;font-size:10px;color:#d5e1eb;line-height:1.55}.bottom-guide b{color:white;font-size:11px}
-.joystick{position:absolute;left:18px;bottom:88px;width:112px;height:112px;border-radius:50%;background:#07152255;border:2px solid #d3f5ff7a;box-shadow:inset 0 0 0 10px #ffffff08;touch-action:none;display:none}
-.joy-stick{position:absolute;left:31px;top:31px;width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,#8ff0ff,#279fc4);border:2px solid #d6fbff;box-shadow:0 4px 15px #0006}
+.joystick{position:absolute;left:14px;bottom:76px;width:76px;height:76px;border-radius:50%;background:#07152249;border:2px solid #d3f5ff6d;box-shadow:inset 0 0 0 7px #ffffff08;touch-action:none;pointer-events:none;opacity:.64;display:none;transition:opacity .12s}
+.joystick.touching{opacity:.96;background:#0715229c}
+.joy-stick{position:absolute;left:21px;top:21px;width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#8ff0ff,#279fc4);border:2px solid #d6fbff;box-shadow:0 4px 15px #0006;will-change:transform}
 .actions{position:absolute;right:12px;bottom:14px;display:grid;grid-template-columns:repeat(2,minmax(68px,82px));gap:7px}
 .action{min-height:61px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;font-size:11px;padding:6px 3px;border-radius:15px}
 .action .action-icon{font-size:20px;line-height:1}.action.primary-action{background:linear-gradient(145deg,#098ca6ed,#135b85f5);border-color:#b9f4ff70}.action:disabled{opacity:.55}
@@ -45,14 +46,14 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
  .brand{padding:8px 10px;max-width:148px}.brand-main{font-size:11px}.brand-sub{font-size:9px}.stats{font-size:10px;padding:7px 9px;min-width:80px}.stats strong{font-size:12px}.topbtn{min-height:37px;padding:8px 9px;font-size:11px}
  .objective{top:67px;width:calc(100vw - 16px);grid-template-columns:36px minmax(0,1fr) auto;gap:8px;padding:8px 10px;border-radius:14px}.arrow-wrap{width:35px;height:35px}.arrow{font-size:23px}.obj-title{font-size:12px}.obj-sub{font-size:9px}.obj-kicker{font-size:8px}.distance{font-size:12px}.distance small{font-size:8px}
  .interaction-tip{top:133px;font-size:10px}.bottom-guide{bottom:201px;left:8px;max-width:44vw;padding:8px 9px;font-size:9px}.bottom-guide b{font-size:10px}
- .joystick{display:block;left:12px;bottom:89px;width:103px;height:103px}.joy-stick{left:28px;top:28px;width:43px;height:43px}
+ .joystick{display:block;left:12px;bottom:84px;width:76px;height:76px}.joy-stick{left:21px;top:21px;width:34px;height:34px}
  .actions{right:8px;bottom:9px;grid-template-columns:repeat(2,67px);gap:6px}.action{min-height:51px;font-size:10px;border-radius:13px}.action .action-icon{font-size:18px}
  .toast{top:150px;font-size:11px}.tutorial{gap:7px}.tutorial-step{padding:10px;min-height:76px}.tutorial-step b{font-size:12px}.tutorial-step small{font-size:10px}
 }
 @media(orientation:landscape) and (max-height:520px){
  .topbar{top:5px;left:8px;right:8px}.brand{padding:6px 9px}.brand-main{font-size:11px}.brand-sub{font-size:8px}.stats{padding:5px 9px;line-height:1.35}.topbtn{min-height:31px;padding:6px 9px}
  .objective{top:53px;left:50%;width:min(355px,46vw);padding:6px 9px;grid-template-columns:30px minmax(0,1fr) auto;gap:6px}.arrow-wrap{width:29px;height:29px;border-radius:9px}.arrow{font-size:20px}.obj-title{font-size:11px;margin:1px 0}.obj-sub{font-size:8px}.obj-kicker{font-size:7px}.distance{font-size:10px}.distance small{font-size:7px}
- .interaction-tip{top:112px;font-size:9px;padding:5px 9px}.joystick{width:90px;height:90px;left:10px;bottom:8px}.joy-stick{left:23px;top:23px;width:40px;height:40px}
+ .interaction-tip{top:112px;font-size:9px;padding:5px 9px}.joystick{width:68px;height:68px;left:9px;bottom:8px}.joy-stick{left:18px;top:18px;width:32px;height:32px}
  .actions{right:8px;bottom:8px;grid-template-columns:repeat(2,65px);gap:5px}.action{min-height:43px;padding:4px;font-size:9px;border-radius:11px}.action .action-icon{font-size:16px}
  .bottom-guide{left:109px;bottom:10px;max-width:150px;font-size:8px;padding:7px 9px}.bottom-guide b{font-size:9px}.toast{top:116px}
  #mapCanvas{max-height:62dvh}
@@ -82,7 +83,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   <h1>CITY LIFE</h1>
   <p class="subtitle">一座可以走、可以開車、可以接任務的 3D 城市。先看懂操作，再出發。</p>
   <div class="tutorial">
-   <div class="tutorial-step"><span class="ico">🕹️</span><b>① 移動角色</b><small>手機：左下搖桿。電腦：W A S D 或方向鍵。</small></div>
+   <div class="tutorial-step"><span class="ico">🕹️</span><b>① 移動角色</b><small>手機：左半邊任何位置按住拖動。電腦：W A S D 或方向鍵。</small></div>
    <div class="tutorial-step"><span class="ico">🟡</span><b>② 跟著金色箭頭</b><small>看畫面上方的方向箭頭與距離，往金色光柱走。</small></div>
    <div class="tutorial-step"><span class="ico">✦</span><b>③ 靠近再互動</b><small>走進光圈，按右側「互動」即可完成任務。</small></div>
    <div class="tutorial-step"><span class="ico">🚗</span><b>④ 靠近車輛</b><small>靠近可用車輛，互動按鈕會變成「上車」；再按一次下車。</small></div>
@@ -106,7 +107,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   <div id="objectiveDistance" class="distance">--<small>公尺</small></div>
  </div>
  <div id="interactionTip" class="interaction-tip hidden">靠近金色光柱，按「互動」完成任務</div>
- <div class="bottom-guide panel"><b>怎麼玩？</b><br><span id="guideLine">看上方箭頭；走到光圈，再按互動。</span><br>拖曳空白畫面可轉視角。</div>
+ <div class="bottom-guide panel"><b>怎麼玩？</b><br><span id="guideLine">看上方箭頭；走到光圈，再按互動。</span><br><span id="cameraHint">拖曳空白畫面可轉視角。</span></div>
  <div id="joystick" class="joystick"><div id="joyStick" class="joy-stick"></div></div>
  <div class="actions">
   <button id="interactBtn" class="action primary-action"><span class="action-icon">✦</span><span id="interactLabel">互動</span></button>
@@ -128,7 +129,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
  <div class="help-card panel">
   <div class="help-head"><h2>操作說明</h2><button id="closeHelp" class="close-btn">關閉 ✕</button></div>
   <ul class="help-list">
-   <li><span class="help-ico">🕹️</span><span><b>移動：</b>手機拖動左下搖桿；電腦按 W A S D 或方向鍵。</span></li>
+   <li><span class="help-ico">🕹️</span><span><b>移動：</b>手機左半邊任何位置按住拖動；電腦按 W A S D 或方向鍵。</span></li>
    <li><span class="help-ico">👀</span><span><b>轉視角：</b>用手指／滑鼠拖曳沒有按鈕的畫面。</span></li>
    <li><span class="help-ico">🟡</span><span><b>做任務：</b>追蹤上方箭頭和距離。靠近光圈後，互動按鈕會提醒你完成任務。</span></li>
    <li><span class="help-ico">🚗</span><span><b>開車：</b>走到車旁按上車；方向鍵／搖桿控制方向與前進，再按互動下車。</span></li>
@@ -445,7 +446,9 @@ function updateHUD(){
   $("objectiveTitle").textContent="任務完成，自由探索";$("objectiveSub").textContent="開車、逛城市，或收集綠色晶片賺取現金。";
   $("objectiveDistance").innerHTML="自由<small>探索中</small>";$("objectiveArrow").style.transform="rotate(0deg)";$("objectiveArrow").style.opacity=".5";
  }
- $("guideLine").textContent=inCar?"左側控制轉向／行駛；互動按鈕可以下車。":(m?"看金色箭頭走，進入光圈按互動。":"靠近車輛可上車；綠色晶片會自動收集。");
+ const touchLayout=innerWidth<=640||(innerHeight<=520&&innerWidth>innerHeight);
+ $("guideLine").textContent=inCar?"左側控制轉向／行駛；互動按鈕可以下車。":(m?(touchLayout?"左半邊任何位置按住拖動，走到光圈後按互動。":"看金色箭頭走，進入光圈按互動。"):(touchLayout?"左半邊按住拖動移動；靠近車輛可上車，綠色晶片會自動收集。":"靠近車輛可上車；綠色晶片會自動收集。"));
+ $("cameraHint").textContent=touchLayout?"右半邊拖曳可轉視角。":"拖曳空白畫面可轉視角。";
  syncInteractLabel();
 }
 function interact(){
@@ -554,21 +557,60 @@ function setupControls(){
  },{passive:false});
  addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;});
  const joyEl=$("joystick"),stick=$("joyStick");
+ let movePointerId=null,moveOrigin={x:0,y:0};
+ const touchMoveLayout=()=>innerWidth<=640||(innerHeight<=520&&innerWidth>innerHeight);
+ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
  const joyMove=e=>{
-  const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;
-  const max=r.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max;}
-  joy.x=dx/max;joy.y=dy/max;stick.style.transform="translate("+dx+"px,"+dy+"px)";
+  if(movePointerId!==e.pointerId)return;
+  let dx=e.clientX-moveOrigin.x,dy=e.clientY-moveOrigin.y;
+  const max=Math.min(22,joyEl.clientWidth*.29),len=Math.hypot(dx,dy);
+  if(len<1.8){joy.x=0;joy.y=0;stick.style.transform="translate(0px, 0px)";return;}
+  const scale=len>max?max/len:1;dx*=scale;dy*=scale;
+  const response=Math.min(1,len/Math.max(8,max*.58));
+  joy.x=(dx/(Math.hypot(dx,dy)||1))*response;
+  joy.y=(dy/(Math.hypot(dx,dy)||1))*response;
+  stick.style.transform="translate("+dx+"px,"+dy+"px)";
+  if(e.cancelable)e.preventDefault();
  };
- const joyEnd=()=>{joy.x=0;joy.y=0;stick.style.transform="translate(0,0)";};
- joyEl.addEventListener("pointerdown",e=>{e.preventDefault();joyEl.setPointerCapture(e.pointerId);joyMove(e);});
- joyEl.addEventListener("pointermove",e=>{if(e.buttons||e.pressure>0)joyMove(e);});
- joyEl.addEventListener("pointerup",joyEnd);joyEl.addEventListener("pointercancel",joyEnd);
- renderer.domElement.addEventListener("pointerdown",e=>{renderer.domElement.focus({preventScroll:true});drag={x:e.clientX,y:e.clientY,id:e.pointerId};renderer.domElement.setPointerCapture(e.pointerId);});
+ const joyEnd=e=>{
+  if(movePointerId===null||(e&&e.pointerId!==movePointerId))return;
+  movePointerId=null;joy.x=0;joy.y=0;stick.style.transform="translate(0px, 0px)";
+  joyEl.classList.remove("touching");
+  joyEl.style.left="";joyEl.style.top="";joyEl.style.bottom="";
+ };
+ const beginLeftMove=e=>{
+  if(!started||!touchMoveLayout()||movePointerId!==null||e.clientX>=innerWidth*.5)return;
+  if(!$("mapScreen").classList.contains("hidden")||!$("helpScreen").classList.contains("hidden"))return;
+  if(e.target&&e.target.closest&&e.target.closest("button,a,input,textarea,select,#mapScreen,#helpScreen,#startScreen"))return;
+  if(e.button!==undefined&&e.button!==0)return;
+  if(e.cancelable)e.preventDefault();
+  movePointerId=e.pointerId;
+  const size=joyEl.offsetWidth||76,half=innerWidth*.5;
+  moveOrigin.x=clamp(e.clientX,size*.16,Math.max(size*.16,half-size*.16));
+  moveOrigin.y=clamp(e.clientY,size*.16,Math.max(size*.16,innerHeight-size*.16));
+  joyEl.style.left=(moveOrigin.x-size/2)+"px";
+  joyEl.style.top=(moveOrigin.y-size/2)+"px";
+  joyEl.style.bottom="auto";
+  joyEl.classList.add("touching");
+  joy.x=0;joy.y=0;stick.style.transform="translate(0px, 0px)";
+  try{renderer.domElement.setPointerCapture(e.pointerId);}catch(err){}
+ };
+ addEventListener("pointerdown",beginLeftMove,{capture:true,passive:false});
+ addEventListener("pointermove",e=>{if(movePointerId===e.pointerId)joyMove(e);},{capture:true,passive:false});
+ addEventListener("pointerup",joyEnd,true);addEventListener("pointercancel",joyEnd,true);
+ renderer.domElement.addEventListener("pointerdown",e=>{
+  if(movePointerId===e.pointerId)return;
+  if(touchMoveLayout()&&e.clientX<innerWidth*.5)return;
+  renderer.domElement.focus({preventScroll:true});drag={x:e.clientX,y:e.clientY,id:e.pointerId};
+  try{renderer.domElement.setPointerCapture(e.pointerId);}catch(err){}
+ });
  renderer.domElement.addEventListener("pointermove",e=>{
-  if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  if(movePointerId===e.pointerId||!drag||drag.id!==e.pointerId)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
   yaw-=dx*.006;pitch=Math.max(.12,Math.min(.75,pitch+dy*.0025));drag.x=e.clientX;drag.y=e.clientY;
  });
- const endDrag=()=>drag=null;renderer.domElement.addEventListener("pointerup",endDrag);renderer.domElement.addEventListener("pointercancel",endDrag);
+ const endDrag=e=>{if(!e||!drag||drag.id===e.pointerId)drag=null;};
+ renderer.domElement.addEventListener("pointerup",endDrag);renderer.domElement.addEventListener("pointercancel",endDrag);
  $("startBtn").addEventListener("click",()=>{started=true;hideScreen("startScreen");$("hud").classList.remove("hidden");say("先看上方金色箭頭，帶你走到第一個任務點。");updateHUD();});
  $("interactBtn").addEventListener("click",interact);$("jumpBtn").addEventListener("click",jump);
  $("runBtn").addEventListener("pointerdown",()=>{runTouch=true;});$("runBtn").addEventListener("pointerup",()=>{runTouch=false;});$("runBtn").addEventListener("pointercancel",()=>{runTouch=false;});$("runBtn").addEventListener("pointerleave",()=>{runTouch=false;});
