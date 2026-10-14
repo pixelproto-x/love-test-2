@@ -11,7 +11,7 @@
     "prepare:desktop": "node desktop-app/prepare-assets.cjs",
     "start": "npm run prepare:desktop && electron .",
     "test:app": "npm run prepare:desktop && node desktop-app/smoke-test.cjs",
-    "build:win": "npm run prepare:desktop && electron-builder --win nsis portable --x64"
+    "build:win": "npm run prepare:desktop && electron-builder --win nsis portable --x64 --publish never"
   },
   "devDependencies": {
     "electron": "44.7.2",
