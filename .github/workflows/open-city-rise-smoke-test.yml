@@ -89,10 +89,25 @@ jobs:
             } else {
               assert.equal(await page.locator('#touchUI').evaluate(el => getComputedStyle(el).display === 'none'), true, 'desktop: touch controls should be hidden');
               assert.equal(await page.evaluate(() => document.pointerLockElement !== null), false, 'desktop: pointer locked automatically on start');
-              const before = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
-              await page.keyboard.down('w'); await page.waitForTimeout(850); await page.keyboard.up('w');
-              const after = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
-              assert.ok(Math.hypot(after.x - before.x, after.z - before.z) > 0.5, 'desktop: keyboard movement failed');
+              const directionTests = [
+                { key: 'w', axis: 'z', sign: -1, name: 'W forward' },
+                { key: 's', axis: 'z', sign: 1, name: 'S backward' },
+                { key: 'a', axis: 'x', sign: -1, name: 'A left' },
+                { key: 'd', axis: 'x', sign: 1, name: 'D right' }
+              ];
+              for (const test of directionTests) {
+                const before = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
+                await page.keyboard.down(test.key);
+                await page.waitForTimeout(650);
+                await page.keyboard.up(test.key);
+                await page.waitForTimeout(100);
+                const after = await page.evaluate(() => window.__OPEN_CITY_DEBUG.getPlayerPosition());
+                const delta = after[test.axis] - before[test.axis];
+                assert.ok(test.sign * delta > 0.25,
+                  'desktop: ' + test.name + ' movement failed; delta=' + delta.toFixed(3) +
+                  '; before=' + JSON.stringify(before) + '; after=' + JSON.stringify(after));
+                console.log('desktop keyboard ' + test.name + ': delta=' + delta.toFixed(3));
+              }
             }
 
             await page.locator('#trainerToggle').click();
